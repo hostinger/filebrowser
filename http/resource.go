@@ -113,7 +113,7 @@ func resourcePostHandler(fileCache FileCache) handleFunc {
 				return http.StatusForbidden, nil
 			}
 
-			return archiveHandler(w, r, d)
+			return archiveHandler(r, d)
 		}
 
 		file, err := files.NewFileInfo(files.FileOptions{
@@ -360,7 +360,7 @@ func patchAction(ctx context.Context, action, src, dst string, d *data, fileCach
 	}
 }
 
-func archiveHandler(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
+func archiveHandler(r *http.Request, d *data) (int, error) {
 	dir := strings.TrimSuffix(r.URL.Path, "/archive")
 
 	destDir, err := files.NewFileInfo(files.FileOptions{
@@ -404,7 +404,7 @@ func archiveHandler(w http.ResponseWriter, r *http.Request, d *data) (int, error
 	}
 
 	for i, path := range filenames {
-		_, err := d.user.Fs.Stat(path)
+		_, err = d.user.Fs.Stat(path)
 		if err != nil {
 			return errToStatus(err), err
 		}
@@ -422,7 +422,7 @@ func archiveHandler(w http.ResponseWriter, r *http.Request, d *data) (int, error
 
 func parseQueryFilename(r *http.Request, f *files.FileInfo) (string, error) {
 	name := r.URL.Query().Get("name")
-	name, err := url.QueryUnescape(strings.Replace(name, "+", "%2B", -1)) //nolint:govet
+	name, err := url.QueryUnescape(strings.Replace(name, "+", "%2B", -1))
 	if err != nil {
 		return "", err
 	}
@@ -433,7 +433,6 @@ func parseQueryFilename(r *http.Request, f *files.FileInfo) (string, error) {
 	return filepath.Join(f.Path, slashClean(name)), nil
 }
 
-//nolint: goconst
 func parseQueryArchiveAlgorithm(r *http.Request) (string, archiver.Archiver, error) {
 	// TODO: use enum
 	switch r.URL.Query().Get("algo") {
