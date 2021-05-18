@@ -150,6 +150,7 @@
     "scheduleMessage": "Pick a date and time to schedule the publication of this post.",
     "show": "Show",
     "size": "Size",
+    "inodeCount": "({count} inodes)",
     "upload": "Upload",
     "uploadMessage": "Select an option to upload.",
     "optionalPassword": "Optional password"

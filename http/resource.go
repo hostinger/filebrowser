@@ -34,6 +34,17 @@ var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 		return errToStatus(err), err
 	}
 
+	if r.URL.Query().Get("disk_usage") == "true" {
+		du, inodes, err := fileutils.DiskUsage(file.Fs, file.Path, 100)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
+		file.DiskUsage = du
+		file.Inodes = inodes
+		file.Content = ""
+		return renderJSON(w, r, file)
+	}
+
 	if file.IsDir {
 		file.Listing.Sorting = d.user.Sorting
 		file.Listing.ApplySort()
@@ -385,7 +396,7 @@ func archiveHandler(r *http.Request, d *data) (int, error) {
 		return http.StatusBadRequest, err
 	}
 
-	extension, ar, err := parseQueryArchiveAlgorithm(r)
+	extension, ar, err := parseArchiver(r.URL.Query().Get("algo"))
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -433,9 +444,8 @@ func parseQueryFilename(r *http.Request, f *files.FileInfo) (string, error) {
 	return filepath.Join(f.Path, slashClean(name)), nil
 }
 
-func parseQueryArchiveAlgorithm(r *http.Request) (string, archiver.Archiver, error) {
-	// TODO: use enum
-	switch r.URL.Query().Get("algo") {
+func parseArchiver(algo string) (string, archiver.Archiver, error) {
+	switch algo {
 	case "zip", "true", "":
 		return ".zip", archiver.NewZip(), nil
 	case "tar":

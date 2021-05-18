@@ -155,6 +155,11 @@ export async function checksum(url, algo) {
   return (await data.json()).checksums[algo];
 }
 
+export async function diskUsage(url) {
+  const data = await resourceAction(`${url}?disk_usage=true`, "GET");
+  return await data.json();
+}
+
 export async function archive(url, name, format, ...files) {
   let arg = "";
 
