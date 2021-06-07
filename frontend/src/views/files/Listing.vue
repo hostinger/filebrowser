@@ -481,6 +481,7 @@ export default {
       if (event.keyCode === 27) {
         // Reset files selection.
         this.$store.commit("resetSelected");
+        this.$store.commit("hideContextMenu");
       }
 
       // Del!

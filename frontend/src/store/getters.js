@@ -2,6 +2,8 @@ const getters = {
   isLogged: (state) => state.user !== null,
   isFiles: (state) => !state.loading && state.route.name === "Files",
   isListing: (state, getters) => getters.isFiles && state.req.isDir,
+  isVisibleContext: (state, getters) =>
+    getters.isListing && state.contextMenu !== null,
   selectedCount: (state) => state.selected.length,
   progress: (state) => {
     if (state.upload.progress.length == 0) {
