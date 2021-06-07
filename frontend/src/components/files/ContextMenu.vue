@@ -84,23 +84,18 @@ export default {
   components: { Action },
   computed: {
     ...mapState(["req", "selected", "user", "selected", "contextMenu"]),
-    ...mapGetters(["selectedCount"]),
+    ...mapGetters(["selectedCount", "onlyArchivesSelected"]),
     menuPosition() {
       if (this.contextMenu === null) {
         return { left: "0px", right: "0px" };
       }
-
-      const width =
-        window.innerWidth ||
-        document.documentElement.clientWidth ||
-        document.body.clientWidth;
 
       let style = {
         left: this.contextMenu.x + "px",
         top: this.contextMenu.y + "px",
       };
 
-      if (width - this.contextMenu.x < 150) {
+      if (window.innerWidth - this.contextMenu.x < 150) {
         style.transform = "translateX(calc(-100% - 3px))";
       }
 
@@ -118,22 +113,6 @@ export default {
         archive: this.selectedCount > 0 && this.user.perm.create,
         unarchive: this.selectedCount === 1 && this.onlyArchivesSelected,
       };
-    },
-    onlyArchivesSelected() {
-      let extensions = [".zip", ".tar", ".gz", ".bz2", ".xz", ".lz4", ".sz"];
-
-      if (this.selectedCount < 1) {
-        return false;
-      }
-
-      for (const i of this.selected) {
-        let item = this.req.items[i];
-        if (item.isDir || !extensions.includes(item.extension)) {
-          return false;
-        }
-      }
-
-      return true;
     },
   },
   mounted() {

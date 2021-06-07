@@ -13,6 +13,20 @@ const getters = {
     let sum = state.upload.progress.reduce((acc, val) => acc + val);
     return Math.ceil((sum / state.upload.size) * 100);
   },
+  onlyArchivesSelected: (state, getters) => {
+    let extensions = [".zip", ".tar", ".gz", ".bz2", ".xz", ".lz4", ".sz"];
+    let items = state.req.items;
+    if (getters.selectedCount < 1) {
+      return false;
+    }
+    for (const i of state.selected) {
+      let item = items[i];
+      if (item.isDir || !extensions.includes(item.extension)) {
+        return false;
+      }
+    }
+    return true;
+  },
 };
 
 export default getters;

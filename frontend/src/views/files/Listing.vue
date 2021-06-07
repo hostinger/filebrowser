@@ -325,7 +325,7 @@ export default {
       "selected",
       "loading",
     ]),
-    ...mapGetters(["selectedCount"]),
+    ...mapGetters(["selectedCount", "onlyArchivesSelected"]),
     nameSorted() {
       return this.req.sorting.by === "name";
     },
@@ -400,22 +400,6 @@ export default {
     },
     isMobile() {
       return this.width <= 736;
-    },
-    onlyArchivesSelected() {
-      let extensions = [".zip", ".tar", ".gz", ".bz2", ".xz", ".lz4", ".sz"];
-
-      if (this.selectedCount < 1) {
-        return false;
-      }
-
-      for (const i of this.selected) {
-        let item = this.req.items[i];
-        if (item.isDir || !extensions.includes(item.extension)) {
-          return false;
-        }
-      }
-
-      return true;
     },
   },
   watch: {
