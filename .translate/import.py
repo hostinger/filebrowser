@@ -1,42 +1,47 @@
 import json
 import configparser
+from json import decoder
 import requests
 
-f = open('../frontend/src/i18n/en.json',)
-data = json.load(f)
-f.close()
-
-def flatten(data):
-    flattened = {}
+def deflatten(data):
+    deflattened = {}
 
     for key, value in data.items():
-        if isinstance(value, dict):
-            temp = flatten(value)
-            for k, v in temp.items():
-                flattened[key + '.' + k] = v
-        else:
-            flattened[key] = value
+        parts = key.split('.')
+        temp = deflattened
+        for idx, part in enumerate(parts):
+            if part not in temp:
+                if idx == (len(parts) - 1):
+                    temp[part] = value
+                else:
+                    temp[part] = {}
+            temp = temp[part]
 
-    return flattened
-
-
-flattened = flatten(data)
+    return deflattened
 
 config = configparser.ConfigParser()
 config.read('config')
 main = config['main']
-url = main['host'] + '/api/v2/messages?key=' + main['key']
+
+keyQuery = '?key=' + main['key']
 headers = {'accept': 'application/json'}
 
-for key, value in flattened.items():
-    payload = {
-        'brand': 'filebrowser',
-        'body': value,
-        'slug': key,
-    }
-    response = requests.post(
-        url,
-        data=payload,
-        headers=headers
-    )
-    print(response.status_code, response.text)
+response = requests.get(main['host'] + '/api/v2/brands/' + main['brand'] + '/languages' + keyQuery, headers=headers)
+if response.status_code != 200:
+    raise Exception('Could not fetch brand languages')
+
+languages = json.loads(response.text)
+
+for language in languages:
+    print(language['code'])
+    response = requests.get(main['host'] + '/api/v2/brands/' + main['brand'] + '/languages/' + language['code'] + '/dictionary' + keyQuery + '&unescaped_unicode=1')
+    if response.status_code != 200:
+        print('COULD NOT FETCH TRANSLATIONS FOR LANGUAGE: %s' % language['code'])
+        continue
+
+    decoded = json.loads(response.text)
+    parsed = deflatten(decoded)
+    file = '../frontend/src/i18n/%s.json' % language['code']
+    fd = open(file, 'w')
+    fd.write(json.dumps(parsed, indent=2, ensure_ascii=False))
+    fd.close()
