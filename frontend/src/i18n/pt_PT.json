@@ -1,5 +1,6 @@
 {
   "buttons": {
+    "archive": "Archive",
     "cancel": "Cancelar",
     "close": "Fechar",
     "copy": "Copiar",
@@ -8,6 +9,7 @@
     "create": "Criar",
     "delete": "Eliminar",
     "download": "Descarregar",
+    "hideDotfiles": "",
     "info": "Info",
     "more": "Mais",
     "move": "Mover",
@@ -15,7 +17,9 @@
     "new": "Novo",
     "next": "Próximo",
     "ok": "OK",
+    "openFile": "Open file",
     "permalink": "Obter link permanente",
+    "permissions": "Permissions",
     "previous": "Anterior",
     "publish": "Publicar",
     "rename": "Alterar nome",
@@ -28,16 +32,20 @@
     "selectMultiple": "Selecionar vários",
     "share": "Partilhar",
     "shell": "Alternar shell",
+    "submit": "Submit",
     "switchView": "Alterar vista",
     "toggleSidebar": "Alternar barra lateral",
+    "unarchive": "Unarchive",
     "update": "Atualizar",
     "upload": "Enviar"
   },
   "download": {
     "downloadFile": "Descarregar ficheiro",
-    "downloadFolder": "Descarregar pasta"
+    "downloadFolder": "Descarregar pasta",
+    "downloadSelected": ""
   },
   "errors": {
+    "connection": "The server can't be reached.",
     "forbidden": "Não tem permissões para aceder a isto",
     "internal": "Algo correu bastante mal.",
     "notFound": "Esta localização não é alcançável."
@@ -75,20 +83,21 @@
     "help": "Ajuda"
   },
   "languages": {
-    "ar": "Árabe",
-    "de": "Alemão",
-    "en": "Inglês",
-    "es": "Espanhol",
-    "fr": "Francês",
-    "it": "Italiano",
-    "ja": "Japonês",
-    "ko": "Coreano",
-    "pl": "Polaco",
-    "pt": "Português",
+    "arAR": "العربية",
+    "enGB": "English",
+    "esAR": "Español (Argentina)",
+    "esCO": "Español (Colombia)",
+    "esES": "Español",
+    "esMX": "Español (Mexico)",
+    "frFR": "Français",
+    "idID": "Indonesian",
+    "ltLT": "Lietuvių",
     "ptBR": "Português (Brasil)",
-    "ru": "Russo",
-    "zhCN": "Chinês simplificado",
-    "zhTW": "Chinês tradicional"
+    "ptPT": "Português",
+    "ruRU": "Русский",
+    "trTR": "Türk",
+    "ukUA": "Український",
+    "zhCN": "中文 (简体)"
   },
   "login": {
     "createAnAccount": "Criar uma conta",
@@ -104,18 +113,27 @@
   },
   "permanent": "Permanente",
   "prompts": {
+    "archive": "Archive",
+    "archiveMessage": "Choose archive name and format:",
     "copy": "Copiar",
     "copyMessage": "Escolha um lugar para onde copiar os ficheiros:",
     "currentlyNavigating": "A navegar em:",
     "deleteMessageMultiple": "Quer eliminar {count} ficheiro(s)?",
+    "deleteMessageShare": "Are you sure you want to delete this share({path})?",
     "deleteMessageSingle": "Quer eliminar esta pasta/ficheiro?",
     "deleteTitle": "Eliminar ficheiros",
+    "directories": "Directories",
+    "directoriesAndFiles": "Directories and files",
     "displayName": "Nome:",
     "download": "Descarregar ficheiros",
     "downloadMessage": "Escolha o formato do ficheiro que quer descarregar.",
     "error": "Algo correu mal",
+    "execute": "Execute",
     "fileInfo": "Informação do ficheiro",
+    "files": "Files",
     "filesSelected": "{count} ficheiros selecionados.",
+    "group": "Group",
+    "inodeCount": "({count} inodes)",
     "lastModified": "Última alteração",
     "move": "Mover",
     "moveMessage": "Escolha uma nova casa para os seus ficheiros/pastas:",
@@ -126,6 +144,12 @@
     "newFileMessage": "Escreva o nome do novo ficheiro.",
     "numberDirs": "Número de pastas",
     "numberFiles": "Número de ficheiros",
+    "optionalPassword": "Optional password",
+    "others": "Others",
+    "owner": "Owner",
+    "permissions": "Permissions",
+    "read": "Read",
+    "recursive": "Recursive",
     "rename": "Alterar nome",
     "renameMessage": "Insira um novo nome para",
     "replace": "Substituir",
@@ -133,7 +157,14 @@
     "schedule": "Agendar",
     "scheduleMessage": "Escolha uma data para publicar este post.",
     "show": "Mostrar",
-    "size": "Tamanho"
+    "size": "Tamanho",
+    "skipTrashMessage": "Skip trash bin and delete immediately",
+    "unarchive": "Unarchive",
+    "unarchiveMessage": "Choose the destination folder name:",
+    "unsavedChanges": "Changes that you made may not be saved. Leave page?",
+    "upload": "",
+    "uploadMessage": "",
+    "write": "Write"
   },
   "search": {
     "images": "Imagens",
@@ -141,8 +172,8 @@
     "pdf": "PDF",
     "pressToSearch": "Tecla Enter para pesquisar...",
     "search": "Pesquisar...",
-    "typeToSearch": "Escrever para pesquisar...",
     "types": "Tipos",
+    "typeToSearch": "Escrever para pesquisar...",
     "video": "Vídeos"
   },
   "settings": {
@@ -171,6 +202,7 @@
     "executeOnShellDescription": "Por padrão, o Navegador de Ficheiros executa os comandos chamando os seus binários diretamente. Se em vez disso, quiser executá-los numa shell (como Bash ou PowerShell), pode definir isso aqui com os argumentos e bandeiras necessários. Se definido, o comando que executa será anexado como um argumento. Isto aplica-se tanto a comandos do utilizador como a hooks de eventos.",
     "globalRules": "Isto é um conjunto global de regras de permissão e negação. Elas aplicam-se a todos os utilizadores. Pode especificar regras específicas para cada configuração do utilizador para sobreporem-se a estas.",
     "globalSettings": "Configurações globais",
+    "hideDotfiles": "",
     "insertPath": "Inserir o caminho",
     "insertRegex": "Inserir expressão regular",
     "instanceName": "Nome da instância",
@@ -181,6 +213,7 @@
     "newUser": "Novo utilizador",
     "password": "Palavra-passe",
     "passwordUpdated": "Palavra-passe atualizada!",
+    "path": "",
     "perm": {
       "create": "Criar ficheiros e pastas",
       "delete": "Eliminar ficheiros e pastas",
@@ -199,6 +232,15 @@
     "rulesHelp": "Aqui pode definir um conjunto de regras para permitir ou bloquear o acesso do utilizador a determinados ficheiros ou pastas. Os ficheiros bloqueados não irão aparecer durante a navegação. Suportamos expressões regulares e os caminhos dos ficheiros devem ser relativos à base do utilizador.\n",
     "scope": "Base",
     "settingsUpdated": "Configurações atualizadas!",
+    "shareDeleted": "Share deleted!",
+    "shareDuration": "",
+    "shareManagement": "",
+    "singleClick": "",
+    "themes": {
+      "dark": "",
+      "light": "",
+      "title": ""
+    },
     "user": "Utilizador",
     "userCommands": "Comandos",
     "userCommandsHelp": "Uma lista, separada com espaços, de comandos disponíveis para este utilizados. Exemplo:",
@@ -206,9 +248,9 @@
     "userDefaults": "Configurações padrão do utilizador",
     "userDeleted": "Utilizador eliminado!",
     "userManagement": "Gestão de utilizadores",
-    "userUpdated": "Utilizador atualizado!",
     "username": "Nome de utilizador",
-    "users": "Utilizadores"
+    "users": "Utilizadores",
+    "userUpdated": "Utilizador atualizado!"
   },
   "sidebar": {
     "help": "Ajuda",
@@ -219,9 +261,14 @@
     "newFile": "Novo ficheiro",
     "newFolder": "Nova pasta",
     "preview": "Pré-visualizar",
+    "quota": {
+      "inodes": "Inodes",
+      "space": "Space"
+    },
     "settings": "Configurações",
     "signup": "Registar",
-    "siteSettings": "Configurações do site"
+    "siteSettings": "Configurações do site",
+    "trashBin": "Trash bin"
   },
   "success": {
     "linkCopied": "Link copiado!"

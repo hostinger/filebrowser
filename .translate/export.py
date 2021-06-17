@@ -2,9 +2,11 @@ import json
 import configparser
 import requests
 
-f = open('../frontend/src/i18n/en.json')
-data = json.load(f)
-f.close()
+config = configparser.ConfigParser()
+config.read('config')
+main = config['main']
+
+source_locale = "en_GB"
 
 def flatten(data):
     flattened = {}
@@ -19,16 +21,27 @@ def flatten(data):
 
     return flattened
 
+key_query = '?key=' + main['key']
+response = requests.get(main['host'] + '/api/v3/brands/' + main['brand'] + '/languages/' + source_locale + '/dictionary' + key_query)
+if response.status_code != 200:
+    print('could not fetch existing messages')
+    exit()
+
+messages = json.loads(response.text)
+
+f = open('../frontend/src/i18n/' + source_locale + '.json')
+data = json.load(f)
+f.close()
 
 flattened = flatten(data)
 
-config = configparser.ConfigParser()
-config.read('config')
-main = config['main']
-url = main['host'] + '/api/v2/messages?key=' + main['key']
+url = main['host'] + '/api/v2/messages' + key_query
 headers = {'accept': 'application/json'}
 
 for key, value in flattened.items():
+    if key in messages:
+        continue
+
     payload = {
         'brand': main['brand'],
         'body': value,
