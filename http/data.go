@@ -1,12 +1,14 @@
 package http
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/tomasen/realip"
 
+	"github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/rules"
 	"github.com/filebrowser/filebrowser/v2/runner"
 	"github.com/filebrowser/filebrowser/v2/settings"
@@ -65,8 +67,22 @@ func handle(fn handleFunc, prefix string, store *storage.Storage, server *settin
 		})
 
 		if status != 0 {
-			txt := http.StatusText(status)
-			http.Error(w, strconv.Itoa(status)+" "+txt, status)
+			if httpErr, ok := err.(*errors.HTTPError); ok {
+				body, e := httpErr.ResponseBody()
+				if e == nil {
+					for k, v := range httpErr.ResponseHeaders() {
+						w.Header().Set(k, v)
+					}
+					w.WriteHeader(status)
+					fmt.Fprintln(w, string(body))
+				} else {
+					txt := http.StatusText(status)
+					http.Error(w, strconv.Itoa(status)+" "+txt, status)
+				}
+			} else {
+				txt := http.StatusText(status)
+				http.Error(w, strconv.Itoa(status)+" "+txt, status)
+			}
 		}
 
 		if status >= 400 || err != nil {

@@ -48,6 +48,10 @@ func errToStatus(err error) int {
 	}
 }
 
+func httpErr(err error, errType string) error {
+	return libErrors.NewHTTPError(err, errType)
+}
+
 // This is an addaptation if http.StripPrefix in which we don't
 // return 404 if the page doesn't have the needed prefix.
 func stripPrefix(prefix string, h http.Handler) http.Handler {

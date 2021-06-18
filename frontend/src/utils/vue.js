@@ -45,9 +45,22 @@ Vue.prototype.$showError = (error, displayReport = true) => {
     );
   }
 
+  let message = error.message || error;
+
+  if (isJSON(message)) {
+    message = JSON.parse(message);
+    if (message instanceof Object) {
+      if (message["type"]) {
+        message = i18n.t("errors." + message["type"]);
+      } else {
+        message = i18n.t("errors.internal");
+      }
+    }
+  }
+
   let n = new Noty(
     Object.assign({}, notyDefault, {
-      text: error.message || error,
+      text: message,
       type: "error",
       timeout: null,
       buttons: btns,
@@ -62,5 +75,13 @@ Vue.directive("focus", {
     el.focus();
   },
 });
+
+function isJSON(str) {
+  try {
+    return JSON.parse(str) && !!str;
+  } catch (e) {
+    return false;
+  }
+}
 
 export default Vue;
