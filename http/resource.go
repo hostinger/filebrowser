@@ -489,7 +489,7 @@ func archiveHandler(r *http.Request, d *data) (int, error) {
 
 	archFile, err := parseQueryFilename(r, destDir)
 	if err != nil {
-		return http.StatusUnprocessableEntity, httpErr(err, "validation.emptyName")
+		return http.StatusUnprocessableEntity, errors.NewHTTPError(err, "validation.emptyName")
 	}
 
 	extension, ar, err := parseArchiver(r.URL.Query().Get("algo"))
@@ -501,7 +501,7 @@ func archiveHandler(r *http.Request, d *data) (int, error) {
 
 	_, err = d.user.Fs.Stat(archFile)
 	if err == nil {
-		return http.StatusUnprocessableEntity, httpErr(err, "resource.alreadyExists")
+		return http.StatusUnprocessableEntity, errors.NewHTTPError(err, "resource.alreadyExists")
 	}
 
 	dir, _ = path.Split(archFile)

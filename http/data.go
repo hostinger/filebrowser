@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -67,22 +66,11 @@ func handle(fn handleFunc, prefix string, store *storage.Storage, server *settin
 		})
 
 		if status != 0 {
+			txt := strconv.Itoa(status) + " " + http.StatusText(status)
 			if httpErr, ok := err.(*errors.HTTPError); ok {
-				body, e := httpErr.ResponseBody()
-				if e == nil {
-					for k, v := range httpErr.ResponseHeaders() {
-						w.Header().Set(k, v)
-					}
-					w.WriteHeader(status)
-					fmt.Fprintln(w, string(body))
-				} else {
-					txt := http.StatusText(status)
-					http.Error(w, strconv.Itoa(status)+" "+txt, status)
-				}
-			} else {
-				txt := http.StatusText(status)
-				http.Error(w, strconv.Itoa(status)+" "+txt, status)
+				txt += " [" + httpErr.Type + "]"
 			}
+			http.Error(w, txt, status)
 		}
 
 		if status >= 400 || err != nil {

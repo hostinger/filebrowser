@@ -1,9 +1,7 @@
 package errors
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 var (
@@ -25,8 +23,8 @@ var (
 )
 
 type HTTPError struct {
-	Err  error  `json:"-"`
-	Type string `json:"type"`
+	Err  error
+	Type string
 }
 
 func (e *HTTPError) Error() string {
@@ -38,20 +36,6 @@ func (e *HTTPError) Error() string {
 
 func (e *HTTPError) Unwrap() error {
 	return e.Err
-}
-
-func (e *HTTPError) ResponseBody() ([]byte, error) {
-	body, err := json.Marshal(e)
-	if err != nil {
-		return nil, fmt.Errorf("error while parsing response body: %v", err)
-	}
-	return body, nil
-}
-
-func (e *HTTPError) ResponseHeaders() map[string]string {
-	return map[string]string{
-		"Content-Type": "application/json; charset=utf-8",
-	}
 }
 
 func NewHTTPError(err error, errType string) error {

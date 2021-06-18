@@ -46,16 +46,9 @@ Vue.prototype.$showError = (error, displayReport = true) => {
   }
 
   let message = error.message || error;
-
-  if (isJSON(message)) {
-    message = JSON.parse(message);
-    if (message instanceof Object) {
-      if (message["type"]) {
-        message = i18n.t("errors." + message["type"]);
-      } else {
-        message = i18n.t("errors.internal");
-      }
-    }
+  let matches = /\[(.+)\]/.exec(message);
+  if (matches && matches.length > 1) {
+    message = i18n.t("errors." + matches[1]);
   }
 
   let n = new Noty(
@@ -75,13 +68,5 @@ Vue.directive("focus", {
     el.focus();
   },
 });
-
-function isJSON(str) {
-  try {
-    return JSON.parse(str) && !!str;
-  } catch (e) {
-    return false;
-  }
-}
 
 export default Vue;
