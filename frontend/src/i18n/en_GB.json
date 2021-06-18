@@ -49,11 +49,11 @@
     "forbidden": "You don't have permissions to access this.",
     "internal": "Something really went wrong.",
     "notFound": "This location can't be reached.",
-    "validation": {
-      "emptyName": "Resource name can't be empty"
-    },
     "resource": {
       "alreadyExists": "Resource with such name already exists"
+    },
+    "validation": {
+      "emptyName": "Resource name can't be empty"
     }
   },
   "files": {
