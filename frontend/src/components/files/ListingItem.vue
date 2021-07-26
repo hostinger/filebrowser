@@ -36,8 +36,11 @@
       </p>
       <p v-else class="name">{{ name }}</p>
 
-      <p v-if="isDir" class="size" data-order="-1">&mdash;</p>
-      <p v-else class="size" :data-order="humanSize()">{{ humanSize() }}</p>
+      <p v-if="isDir && !diskUsage" class="size" data-order="-1">&mdash;</p>
+      <template v-else>
+        <p v-if="isDir" class="size" :data-order="humanDiskUsage()">{{ humanDiskUsage() }}</p>
+        <p v-else class="size" :data-order="humanSize()">{{ humanSize() }}</p>
+      </template>
 
       <p class="modified">
         <time :datetime="modified">{{ humanTime() }}</time>
@@ -72,6 +75,7 @@ export default {
     "url",
     "type",
     "size",
+    "diskUsage",
     "mode",
     "modified",
     "index",
@@ -152,6 +156,9 @@ export default {
       s += (this.mode & 2) != 0 ? "w" : "-";
       s += (this.mode & 1) != 0 ? "x" : "-";
       return s;
+    },
+    humanDiskUsage: function () {
+      return filesize(this.diskUsage);
     },
     humanSize: function () {
       return filesize(this.size);

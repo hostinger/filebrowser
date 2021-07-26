@@ -92,6 +92,11 @@
           :label="$t('buttons.upload')"
           @action="upload"
         />
+        <action
+          icon="file_upload"
+          :label="$t('buttons.directorySizes')"
+          @action="calculateDirSizes"
+        />
         <action icon="info" :label="$t('buttons.info')" show="info" />
         <action
           icon="check_circle"
@@ -836,6 +841,35 @@ export default {
 
           api.download(format, ...files);
         },
+      });
+    },
+    calculateDirSizes() {
+      let links = [];
+
+      if (this.selectedCount === 0) {
+        for (let item of this.req.items) {
+          console.log(item);
+          if (item.isDir) {
+            links.push(item.url);
+          }
+        }
+      } else {
+        for (let selected of this.selected) {
+          links.push(this.req.items[selected].url);
+        }
+      }
+
+      let promises = [];
+      for (let link of links) {
+        promises.push(api.diskUsage(link));
+      }
+
+      Promise.all(promises).then((values) => {
+        if (Array.isArray(values)) {
+          for (let value of values) {
+            
+          }
+        }
       });
     },
     switchView: async function () {
