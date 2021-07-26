@@ -93,7 +93,7 @@
           @action="upload"
         />
         <action
-          icon="file_upload"
+          icon="assessment"
           id="dir_size-button"
           :label="$t('buttons.directorySizes')"
           @action="calculateDirSizes"
