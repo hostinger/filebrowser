@@ -476,15 +476,37 @@ func patchAction(ctx context.Context, action, src, dst string, d *data, fileCach
 		}
 
 		unarchiver, ok := arch.(archiver.Unarchiver)
-		if !ok {
-			return errors.ErrInvalidRequestParams
+		if ok {
+			err = unarchiver.Unarchive(src, dst)
+			if err != nil {
+				return errors.ErrInvalidRequestParams
+			}
+
+			return nil
 		}
 
-		err = unarchiver.Unarchive(src, dst)
-		if err != nil {
-			return errors.ErrInvalidRequestParams
+		decompressor, ok := arch.(archiver.Decompressor)
+		if ok {
+			reader, err := os.Open(src)
+			if err != nil {
+				return errors.ErrInvalidRequestParams
+			}
+
+			dst, err := os.OpenFile(dst, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0644)
+			if err != nil {
+				return errors.ErrInvalidRequestParams
+			}
+
+			err = decompressor.Decompress(reader, dst)
+			if err != nil {
+				fmt.Println(err)
+				return errors.ErrInvalidRequestParams
+			}
+
+			return nil
 		}
-		return nil
+
+		return errors.ErrInvalidRequestParams
 	default:
 		return fmt.Errorf("unsupported action %s: %w", action, errors.ErrInvalidRequestParams)
 	}
