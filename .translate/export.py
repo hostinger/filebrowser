@@ -1,7 +1,6 @@
 import json
 import configparser
 import requests
-from requests.api import head
 
 config = configparser.ConfigParser()
 config.read('config')
