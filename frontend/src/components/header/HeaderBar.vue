@@ -51,7 +51,7 @@ defineProps<{
 const layoutStore = useLayoutStore();
 const slots = useSlots();
 
-const { t } = useI18n();
+const { t } = useI18n() as { t: (key: string) => string };
 
 const ifActionsSlot = computed(() => (slots.actions ? true : false));
 </script>

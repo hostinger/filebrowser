@@ -2,8 +2,6 @@ module github.com/filebrowser/filebrowser/v2
 
 go 1.23.0
 
-toolchain go1.23.3
-
 require (
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/asticode/go-astisub v0.34.0
