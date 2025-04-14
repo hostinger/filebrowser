@@ -76,7 +76,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, type CSSProperties } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  type CSSProperties,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useFileStore } from "@/stores/file";
@@ -103,7 +109,7 @@ const menuStyle = computed((): CSSProperties => {
     return { left: "0px", right: "0px" };
   }
 
-  let style: CSSProperties = {
+  const style: CSSProperties = {
     left: contextMenuStore.position.x + "px",
     top: contextMenuStore.position.y + "px",
   };
@@ -143,7 +149,7 @@ const windowClick = (event: MouseEvent) => {
 };
 
 const openFile = () => {
-  let path = fileStore.req?.items[fileStore.selected[0]].url;
+  const path = fileStore.req?.items[fileStore.selected[0]].url;
   if (path) {
     router.push({ path: path });
   }
@@ -165,10 +171,10 @@ const download = () => {
     confirm: (format: any) => {
       layoutStore.closeHovers();
 
-      let files = [];
+      const files = [];
 
       if (fileStore.selectedCount > 0 && fileStore.req !== null) {
-        for (let i of fileStore.selected) {
+        for (const i of fileStore.selected) {
           files.push(fileStore.req.items[i].url);
         }
       } else {

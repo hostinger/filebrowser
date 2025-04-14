@@ -198,16 +198,17 @@ export default {
   asyncComputed: {
     usage: {
       async get() {
-        let path = this.$route.path.endsWith("/")
+        const path = this.$route.path.endsWith("/")
           ? this.$route.path
           : this.$route.path + "/";
-        let usageStats = { used: 0, total: 0, usedPercentage: 0 };
+
         if (this.disableUsedPercentage) {
-          return usageStats;
+          return { used: 0, total: 0, usedPercentage: 0 };
         }
+
         try {
-          let usage = await api.usage(path);
-          usageStats = {
+          const usage = await api.usage(path);
+          return {
             used: prettyBytes(usage.used, { binary: true }),
             total: prettyBytes(usage.total, { binary: true }),
             usedPercentage: Math.round((usage.used / usage.total) * 100),
@@ -215,7 +216,8 @@ export default {
         } catch (error) {
           this.$showError(error);
         }
-        return usageStats;
+
+        return { used: 0, total: 0, usedPercentage: 0 };
       },
       default: { used: "0 B", total: "0 B", usedPercentage: 0 },
       shouldUpdate() {
@@ -226,7 +228,7 @@ export default {
   methods: {
     ...mapActions(useLayoutStore, ["closeHovers", "showHover"]),
     async fetchUsage() {
-      let path = this.$route.path.endsWith("/")
+      const path = this.$route.path.endsWith("/")
         ? this.$route.path
         : this.$route.path + "/";
       let usageStats = USAGE_DEFAULT;
@@ -234,7 +236,7 @@ export default {
         return Object.assign(this.usage, usageStats);
       }
       try {
-        let usage = await api.usage(path);
+        const usage = await api.usage(path);
         usageStats = {
           used: prettyBytes(usage.used, { binary: true }),
           total: prettyBytes(usage.total, { binary: true }),
@@ -259,8 +261,13 @@ export default {
     logout: auth.logout,
   },
   watch: {
-    isFiles(newValue) {
-      newValue && this.fetchUsage();
+    $route: {
+      handler(to) {
+        if (to.path.includes("/files")) {
+          this.fetchUsage();
+        }
+      },
+      immediate: true,
     },
   },
 };

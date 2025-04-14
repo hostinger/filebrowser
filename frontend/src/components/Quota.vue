@@ -72,9 +72,7 @@ const spaceUsageTitle = computed(() =>
 const inodeUsageTitle = computed(() =>
   !quotaStore.quota
     ? "- / -"
-    : quotaStore.quota.inodes.usage +
-      " / " +
-      quotaStore.quota.inodes.quota
+    : quotaStore.quota.inodes.usage + " / " + quotaStore.quota.inodes.quota
 );
 
 const progress = (info: QuotaInfo) => {

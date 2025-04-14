@@ -67,14 +67,14 @@ const { t } = useI18n();
 
 const $showError = inject<IToastError>("$showError")!;
 
-let overwriteExisting = false;
-let dest: string | null = null;
-let name = "";
+const overwriteExisting = false;
+const dest: string | null = null;
+const name = "";
 
 const unarchiveForm = ref<HTMLFormElement | null>(null);
 
 const overwriteAvailable = computed((): boolean => {
-  let item = fileStore.req?.items[fileStore.selected[0]];
+  const item = fileStore.req?.items[fileStore.selected[0]];
   if (!item) {
     return false;
   }
@@ -93,12 +93,12 @@ const submit = async () => {
     return;
   }
 
-  let item = fileStore.req?.items[fileStore.selected[0]];
+  const item = fileStore.req?.items[fileStore.selected[0]];
   if (!item) {
     return;
   }
 
-  let dst = dest + encodeURIComponent(name);
+  const dst = dest + encodeURIComponent(name);
 
   try {
     buttons.loading("unarchive");
