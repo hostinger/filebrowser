@@ -84,10 +84,10 @@ export default {
     ...mapActions(useQuotaStore, ["fetchQuota"]),
     copy: async function (event) {
       event.preventDefault();
-      let items = [];
+      const items = [];
 
       // Create a new promise for each file.
-      for (let item of this.selected) {
+      for (const item of this.selected) {
         items.push({
           from: this.req.items[item].url,
           to: this.dest + encodeURIComponent(this.req.items[item].name),
@@ -95,7 +95,7 @@ export default {
         });
       }
 
-      let action = async (overwrite, rename) => {
+      const action = async (overwrite, rename) => {
         buttons.loading("copy");
 
         await api
@@ -124,8 +124,8 @@ export default {
         return;
       }
 
-      let dstItems = (await api.fetch(this.dest)).items;
-      let conflict = upload.checkConflict(items, dstItems);
+      const dstItems = (await api.fetch(this.dest)).items;
+      const conflict = upload.checkConflict(items, dstItems);
 
       let overwrite = false;
       let rename = false;

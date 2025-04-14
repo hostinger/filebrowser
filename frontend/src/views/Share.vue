@@ -328,6 +328,7 @@ const token = ref<string>("");
 const audio = ref<HTMLAudioElement>();
 const tag = ref<boolean>(false);
 
+const $showError = inject<IToastError>("$showError")!;
 const $showSuccess = inject<IToastSuccess>("$showSuccess")!;
 
 const { t } = useI18n({});
@@ -466,9 +467,9 @@ const download = () => {
       if (req.value === null) return false;
       layoutStore.closeHovers();
 
-      let files: string[] = [];
+      const files: string[] = [];
 
-      for (let i of fileStore.selected) {
+      for (const i of fileStore.selected) {
         files.push(req.value.items[i].path);
       }
 
@@ -491,13 +492,23 @@ const linkSelected = () => {
 };
 
 const copyToClipboard = (text: string) => {
-  copy(text).then(
+  copy({ text }).then(
     () => {
       // clipboard successfully set
       $showSuccess(t("success.linkCopied"));
     },
     () => {
       // clipboard write failed
+      copy({ text }, { permission: true }).then(
+        () => {
+          // clipboard successfully set
+          $showSuccess(t("success.linkCopied"));
+        },
+        (e) => {
+          // clipboard write failed
+          $showError(e);
+        }
+      );
     }
   );
 };
