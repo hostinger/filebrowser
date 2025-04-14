@@ -71,10 +71,10 @@ const loading = ref<boolean>(false);
 const loadingFormat = ref<string>("");
 
 const archive = async (format: string) => {
-  let items: string[] = [];
+  const items: string[] = [];
 
-  for (let i of fileStore.selected) {
-    let item = fileStore.req?.items[i].name;
+  for (const i of fileStore.selected) {
+    const item = fileStore.req?.items[i].name;
     if (item) {
       items.push(item);
     }
