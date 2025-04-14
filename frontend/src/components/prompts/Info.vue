@@ -203,12 +203,12 @@ export default {
       // eslint-disable-next-line
       event.target.innerHTML = this.$t('files.loading');
 
-      let links = [];
+      const links = [];
 
       if (this.selectedCount === 0 || !this.isListing) {
         links.push(this.$route.path);
       } else {
-        for (let selected of this.selected) {
+        for (const selected of this.selected) {
           links.push(this.req.items[selected].url);
         }
       }
@@ -216,9 +216,9 @@ export default {
       let size = 0;
       let inodes = 0;
 
-      for (let link of links) {
+      for (const link of links) {
         try {
-          let data = await api.diskUsage(link);
+          const data = await api.diskUsage(link);
           size += data.diskUsage;
           inodes += data.inodes;
         } catch (e) {

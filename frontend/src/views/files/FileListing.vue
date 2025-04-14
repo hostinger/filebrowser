@@ -872,31 +872,31 @@ const openSearch = () => {
 };
 
 const calculateDirSizes = () => {
-  let links = [];
+  const links = [];
 
   if (fileStore.selectedCount === 0) {
-    for (let item of fileStore.req?.items ?? []) {
+    for (const item of fileStore.req?.items ?? []) {
       if (item.isDir) {
         links.push(item.url);
       }
     }
   } else {
-    for (let selected of fileStore.selected) {
+    for (const selected of fileStore.selected) {
       if (fileStore.req?.items[selected].isDir) {
         links.push(fileStore.req.items[selected].url);
       }
     }
   }
 
-  let promises = [];
-  for (let link of links) {
+  const promises = [];
+  for (const link of links) {
     promises.push(api.diskUsage(link));
   }
 
   buttons.loading("dir_size");
 
   Promise.allSettled(promises).then((results) => {
-    for (let result of results) {
+    for (const result of results) {
       if (result.status === "fulfilled") {
         fileStore.addDiskUsage(result.value.path, {
           size: result.value.diskUsage,

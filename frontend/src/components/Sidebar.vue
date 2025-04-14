@@ -198,7 +198,7 @@ export default {
   asyncComputed: {
     usage: {
       async get() {
-        let path = this.$route.path.endsWith("/")
+        const path = this.$route.path.endsWith("/")
           ? this.$route.path
           : this.$route.path + "/";
         let usageStats = { used: 0, total: 0, usedPercentage: 0 };
@@ -206,7 +206,7 @@ export default {
           return usageStats;
         }
         try {
-          let usage = await api.usage(path);
+          const usage = await api.usage(path);
           usageStats = {
             used: prettyBytes(usage.used, { binary: true }),
             total: prettyBytes(usage.total, { binary: true }),

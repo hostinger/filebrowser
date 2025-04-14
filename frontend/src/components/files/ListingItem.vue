@@ -360,7 +360,7 @@ const contextMenu = (event: MouseEvent) => {
     fileStore.selected = [props.index];
   }
 
-  let pos = eventPosition(event);
+  const pos = eventPosition(event);
 
   contextMenuStore.show(pos.x + 2, pos.y);
 };

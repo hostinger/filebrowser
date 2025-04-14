@@ -67,14 +67,14 @@ const { t } = useI18n();
 
 const $showError = inject<IToastError>("$showError")!;
 
-let overwriteExisting = false;
-let dest: string | null = null;
-let name = "";
+const overwriteExisting = ref(false);
+const dest = ref("");
+const name = ref("");
 
 const unarchiveForm = ref<HTMLFormElement | null>(null);
 
 const overwriteAvailable = computed((): boolean => {
-  let item = fileStore.req?.items[fileStore.selected[0]];
+  const item = fileStore.req?.items[fileStore.selected[0]];
   if (!item) {
     return false;
   }
@@ -93,17 +93,17 @@ const submit = async () => {
     return;
   }
 
-  let item = fileStore.req?.items[fileStore.selected[0]];
+  const item = fileStore.req?.items[fileStore.selected[0]];
   if (!item) {
     return;
   }
 
-  let dst = dest + encodeURIComponent(name);
+  const dst = dest.value + encodeURIComponent(name.value);
 
   try {
     buttons.loading("unarchive");
     layoutStore.closeHovers();
-    await api.unarchive(item.url, dst, overwriteExisting);
+    await api.unarchive(item.url, dst, overwriteExisting.value);
     fileStore.reload = true;
     quotaStore.fetchQuota(3000);
   } catch (e: any) {

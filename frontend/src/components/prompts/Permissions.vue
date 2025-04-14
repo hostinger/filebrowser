@@ -171,12 +171,12 @@ const masks = {
 };
 
 onMounted(() => {
-  let item = fileStore.req?.items[fileStore.selected[0]];
+  const item = fileStore.req?.items[fileStore.selected[0]];
   if (!item) {
     return;
   }
 
-  let perms = item.mode & masks.permissions;
+  const perms = item.mode & masks.permissions;
 
   // OWNER PERMS
   permissions.value.owner.read = (perms & masks.owner.read) != 0;
@@ -207,7 +207,7 @@ const permMode = computed((): number => {
 });
 
 const permModeString = computed((): string => {
-  let perms = permMode;
+  const perms = permMode;
   let s = "";
   s += (perms.value & masks.owner.read) != 0 ? "r" : "-";
   s += (perms.value & masks.owner.write) != 0 ? "w" : "-";
@@ -222,7 +222,7 @@ const permModeString = computed((): string => {
 });
 
 const dirSelected = computed((): boolean => {
-  let item = fileStore.req?.items[fileStore.selected[0]];
+  const item = fileStore.req?.items[fileStore.selected[0]];
   if (!item) {
     return false;
   }
@@ -231,7 +231,7 @@ const dirSelected = computed((): boolean => {
 });
 
 const chmod = async () => {
-  let item = fileStore.req?.items[fileStore.selected[0]];
+  const item = fileStore.req?.items[fileStore.selected[0]];
   if (!item) {
     return;
   }
