@@ -1,18 +1,18 @@
 package http
 
 import (
-	"errors"
-	"log"
 	"net/http"
 	"net/url"
 	gopath "path"
 	"path/filepath"
 	"strings"
 
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 
+	fbErrors "github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/files"
 	"github.com/filebrowser/filebrowser/v2/fileutils"
+	"github.com/filebrowser/filebrowser/v2/hostinger"
 	"github.com/filebrowser/filebrowser/v2/users"
 )
 
@@ -44,30 +44,8 @@ func parseQueryFiles(r *http.Request, f *files.FileInfo, _ *users.User) ([]strin
 	return fileSlice, nil
 }
 
-//nolint:goconst
-func parseQueryAlgorithm(r *http.Request) (string, archiver.Writer, error) {
-	switch r.URL.Query().Get("algo") {
-	case "zip", "true", "":
-		return ".zip", archiver.NewZip(), nil
-	case "tar":
-		return ".tar", archiver.NewTar(), nil
-	case "targz":
-		return ".tar.gz", archiver.NewTarGz(), nil
-	case "tarbz2":
-		return ".tar.bz2", archiver.NewTarBz2(), nil
-	case "tarxz":
-		return ".tar.xz", archiver.NewTarXz(), nil
-	case "tarlz4":
-		return ".tar.lz4", archiver.NewTarLz4(), nil
-	case "tarsz":
-		return ".tar.sz", archiver.NewTarSz(), nil
-	default:
-		return "", nil, errors.New("format not implemented")
-	}
-}
-
 func setContentDisposition(w http.ResponseWriter, r *http.Request, file *files.FileInfo) {
-	if r.URL.Query().Get("inline") == "true" {
+	if r.URL.Query().Get("inline") == hostinger.QueryTrue {
 		w.Header().Set("Content-Disposition", "inline")
 	} else {
 		// As per RFC6266 section 4.3
@@ -104,75 +82,18 @@ var rawHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *data) 
 	return rawDirHandler(w, r, d, file)
 })
 
-func addFile(ar archiver.Writer, d *data, path, commonPath string) error {
-	if !d.Check(path) {
-		return nil
-	}
-
-	info, err := d.user.Fs.Stat(path)
-	if err != nil {
-		return err
-	}
-
-	if !info.IsDir() && !info.Mode().IsRegular() {
-		return nil
-	}
-
-	file, err := d.user.Fs.Open(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	if path != commonPath {
-		filename := strings.TrimPrefix(path, commonPath)
-		filename = strings.TrimPrefix(filename, string(filepath.Separator))
-		err = ar.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   info,
-				CustomName: filename,
-			},
-			ReadCloser: file,
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	if info.IsDir() {
-		names, err := file.Readdirnames(0)
-		if err != nil {
-			return err
-		}
-
-		for _, name := range names {
-			fPath := filepath.Join(path, name)
-			err = addFile(ar, d, fPath, commonPath)
-			if err != nil {
-				log.Printf("Failed to archive %s: %v", fPath, err)
-			}
-		}
-	}
-
-	return nil
-}
-
 func rawDirHandler(w http.ResponseWriter, r *http.Request, d *data, file *files.FileInfo) (int, error) {
 	filenames, err := parseQueryFiles(r, file, d.user)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
 
-	extension, ar, err := parseQueryAlgorithm(r)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
+	algo := r.URL.Query().Get("algo")
 
-	err = ar.Create(w)
+	extension, err := hostinger.AlgoToExtension(algo)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	defer ar.Close()
 
 	commonDir := fileutils.CommonPrefix(filepath.Separator, filenames...)
 
@@ -188,14 +109,23 @@ func rawDirHandler(w http.ResponseWriter, r *http.Request, d *data, file *files.
 	name += extension
 	w.Header().Set("Content-Disposition", "attachment; filename*=utf-8''"+url.PathEscape(name))
 
-	for _, fname := range filenames {
-		err = addFile(ar, d, fname, commonDir)
-		if err != nil {
-			log.Printf("Failed to archive %s: %v", fname, err)
-		}
+	format, _, err := archives.Identify(r.Context(), extension, nil)
+	if err != nil {
+		return http.StatusInternalServerError, err
 	}
 
-	return 0, nil
+	archiver, ok := format.(archives.Archiver)
+	if !ok {
+		return http.StatusBadRequest, fbErrors.ErrInvalidRequestParams
+	}
+
+	fileInfos, err := hostinger.GatherFiles(d.user.Fs, filenames)
+	if err != nil {
+		return errToStatus(err), err
+	}
+
+	err = archiver.Archive(r.Context(), w, fileInfos)
+	return errToStatus(err), err
 }
 
 func rawFileHandler(w http.ResponseWriter, r *http.Request, file *files.FileInfo) (int, error) {
