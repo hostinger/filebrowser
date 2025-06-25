@@ -14,13 +14,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mholt/archiver/v3"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/spf13/afero"
 
 	fbErrors "github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/files"
 	"github.com/filebrowser/filebrowser/v2/fileutils"
+	"github.com/filebrowser/filebrowser/v2/hostinger"
 )
 
 var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
@@ -62,7 +62,7 @@ var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 		return errToStatus(fbErrors.ErrNotExist), fbErrors.ErrNotExist
 	}
 
-	if r.URL.Query().Get("disk_usage") == "true" {
+	if r.URL.Query().Get("disk_usage") == hostinger.QueryTrue {
 		du, inodes, err := fileutils.DiskUsage(file.Fs, file.Path)
 		if err != nil {
 			return http.StatusInternalServerError, err
@@ -146,7 +146,7 @@ func resourceDeleteHandler(fileCache FileCache) handleFunc {
 			return errToStatus(err), err
 		}
 
-		skipTrash := r.URL.Query().Get("skip_trash") == "true"
+		skipTrash := r.URL.Query().Get("skip_trash") == hostinger.QueryTrue
 
 		if d.user.TrashDir == "" || skipTrash {
 			err = d.RunHook(func() error {
@@ -198,7 +198,8 @@ func resourcePostHandler(fileCache FileCache) handleFunc {
 				return http.StatusForbidden, nil
 			}
 
-			return archiveHandler(r, d)
+			err := archiveHandler(r, d)
+			return errToStatus(err), err
 		}
 
 		file, err := files.NewFileInfo(&files.FileOptions{
@@ -210,7 +211,7 @@ func resourcePostHandler(fileCache FileCache) handleFunc {
 			Checker:    d,
 		})
 		if err == nil {
-			if r.URL.Query().Get("override") != "true" {
+			if r.URL.Query().Get("override") != hostinger.QueryTrue {
 				return http.StatusConflict, nil
 			}
 
@@ -313,8 +314,8 @@ func resourcePatchHandler(fileCache FileCache) handleFunc {
 			return errToStatus(err), err
 		}
 
-		override := r.URL.Query().Get("override") == "true"
-		rename := r.URL.Query().Get("rename") == "true"
+		override := r.URL.Query().Get("override") == hostinger.QueryTrue
+		rename := r.URL.Query().Get("rename") == hostinger.QueryTrue
 		unarchive := action == "unarchive"
 		if !override && !rename && !unarchive {
 			if _, err = d.user.Fs.Stat(dst); err == nil {
@@ -333,7 +334,11 @@ func resourcePatchHandler(fileCache FileCache) handleFunc {
 
 		err = d.RunHook(func() error {
 			if unarchive {
-				return unarchiveAction(src, dst, d, override)
+				if !d.user.Perm.Create {
+					return fbErrors.ErrPermissionDenied
+				}
+
+				return hostinger.Unarchive(r.Context(), src, dst, d.user.Fs, override)
 			}
 			return patchAction(r.Context(), action, src, dst, d, fileCache)
 		}, action, src, dst, d.user)
@@ -509,153 +514,38 @@ var diskUsage = withUser(func(w http.ResponseWriter, r *http.Request, d *data) (
 	})
 })
 
-func unarchiveAction(src, dst string, d *data, overwrite bool) error {
-	if !d.user.Perm.Create {
-		return fbErrors.ErrPermissionDenied
-	}
-
-	src = d.user.FullPath(path.Clean("/" + src))
-	dst = d.user.FullPath(path.Clean("/" + dst))
-
-	arch, err := archiver.ByExtension(src)
-	if err != nil {
-		return err
-	}
-
-	switch a := arch.(type) {
-	case *archiver.Rar:
-		a.OverwriteExisting = overwrite
-	case *archiver.Tar:
-		a.OverwriteExisting = overwrite
-	case *archiver.TarBz2:
-		a.OverwriteExisting = overwrite
-	case *archiver.TarGz:
-		a.OverwriteExisting = overwrite
-	case *archiver.TarLz4:
-		a.OverwriteExisting = overwrite
-	case *archiver.TarSz:
-		a.OverwriteExisting = overwrite
-	case *archiver.TarXz:
-		a.OverwriteExisting = overwrite
-	case *archiver.Zip:
-		a.OverwriteExisting = overwrite
-	}
-
-	unarchiver, ok := arch.(archiver.Unarchiver)
-	if ok {
-		if err := unarchiver.Unarchive(src, dst); err != nil {
-			return fbErrors.ErrInvalidRequestParams
-		}
-
-		return nil
-	}
-
-	decompressor, ok := arch.(archiver.Decompressor)
-	if ok {
-		return fileutils.Decompress(src, dst, decompressor)
-	}
-
-	return fbErrors.ErrInvalidRequestParams
-}
-
-func archiveHandler(r *http.Request, d *data) (int, error) {
-	dir := strings.TrimSuffix(r.URL.Path, "/archive")
-
-	destDir, err := files.NewFileInfo(&files.FileOptions{
+func archiveHandler(r *http.Request, d *data) error {
+	dir, err := files.NewFileInfo(&files.FileOptions{
 		Fs:         d.user.Fs,
-		Path:       dir,
+		Path:       strings.TrimSuffix(r.URL.Path, "/archive"),
 		Modify:     d.user.Perm.Modify,
 		Expand:     false,
 		ReadHeader: false,
 		Checker:    d,
 	})
 	if err != nil {
-		return errToStatus(err), err
+		return err
 	}
 
-	filenames, err := parseQueryFiles(r, destDir, d.user)
+	algo := r.URL.Query().Get("algo")
+
+	archive, err := hostinger.GetFilenameFromQuery(r, dir)
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return fbErrors.ErrInvalidRequestParams
 	}
 
-	archFile, err := parseQueryFilename(r, destDir)
+	filenames, err := parseQueryFiles(r, dir, d.user)
 	if err != nil {
-		return http.StatusUnprocessableEntity, fbErrors.NewHTTPError(err, "validation.emptyName")
+		return fbErrors.ErrInvalidRequestParams
 	}
 
-	extension, ar, err := parseArchiver(r.URL.Query().Get("algo"))
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
-
-	archFile += extension
-
-	_, err = d.user.Fs.Stat(archFile)
-	if err == nil {
-		return http.StatusUnprocessableEntity, fbErrors.NewHTTPError(err, "resource.alreadyExists")
-	}
-
-	dir, _ = path.Split(archFile)
-	err = d.user.Fs.MkdirAll(dir, 0775) //nolint:gomnd
-	if err != nil {
-		return errToStatus(err), err
-	}
-
-	for i, path := range filenames {
-		_, err = d.user.Fs.Stat(path)
-		if err != nil {
-			return errToStatus(err), err
-		}
-		filenames[i] = d.user.FullPath(path)
-	}
-
-	dst := d.user.FullPath(archFile)
-	err = ar.Archive(filenames, dst)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
-
-	return errToStatus(err), err
-}
-
-func parseQueryFilename(r *http.Request, f *files.FileInfo) (string, error) {
-	name := r.URL.Query().Get("name")
-	name, err := url.QueryUnescape(strings.Replace(name, "+", "%2B", -1))
-	if err != nil {
-		return "", err
-	}
-	name = strings.TrimSpace(name)
-	if name == "" {
-		return "", fmt.Errorf("empty name provided")
-	}
-	return filepath.Join(f.Path, slashClean(name)), nil
-}
-
-func parseArchiver(algo string) (string, archiver.Archiver, error) {
-	switch algo {
-	case "zip", "true", "":
-		return ".zip", archiver.NewZip(), nil
-	case "tar":
-		return ".tar", archiver.NewTar(), nil
-	case "targz":
-		return ".tar.gz", archiver.NewTarGz(), nil
-	case "tarbz2":
-		return ".tar.bz2", archiver.NewTarBz2(), nil
-	case "tarxz":
-		return ".tar.xz", archiver.NewTarXz(), nil
-	case "tarlz4":
-		return ".tar.lz4", archiver.NewTarLz4(), nil
-	case "tarsz":
-		return ".tar.sz", archiver.NewTarSz(), nil
-	default:
-		return "", nil, fmt.Errorf("format not implemented")
-	}
+	return hostinger.Archive(r.Context(), d.user.Fs, archive, algo, filenames)
 }
 
 func chmodActionHandler(r *http.Request, d *data) error {
 	target := r.URL.Path
 	perms := r.URL.Query().Get("permissions")
-	recursive := r.URL.Query().Get("recursive") == "true"
+	recursive := r.URL.Query().Get("recursive") == hostinger.QueryTrue
 	recursionType := r.URL.Query().Get("type")
 
 	if !d.user.Perm.Modify {

@@ -9,7 +9,6 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/mholt/archiver/v3"
 	"github.com/spf13/afero"
 
 	"github.com/filebrowser/filebrowser/v2/files"
@@ -177,22 +176,4 @@ func CommonPrefix(sep byte, paths ...string) string {
 	}
 
 	return string(c)
-}
-
-func Decompress(src, dst string, decompressor archiver.Decompressor) error {
-	reader, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-
-	dstfd, err := os.OpenFile(dst, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0644) //nolint:gomnd
-	if err != nil {
-		return err
-	}
-
-	if err := decompressor.Decompress(reader, dstfd); err != nil {
-		return err
-	}
-
-	return nil
 }
