@@ -148,19 +148,19 @@ func GatherFiles(afs afero.Fs, filenames []string) ([]archives.FileInfo, error) 
 	fileInfos := []archives.FileInfo{}
 	for _, filename := range filenames {
 		err := afero.Walk(afs, filename, func(path string, info fs.FileInfo, err error) error {
-			var linkTarget string
-			if info.Mode()&os.ModeSymlink != 0 {
-				linkTarget, err = symlinkFn(filename)
-				if err != nil {
-					return err
-				}
-			}
-
 			nameInArchive := strings.TrimPrefix(path, commonDir)
 			nameInArchive = strings.TrimPrefix(nameInArchive, string(filepath.Separator))
 
 			if info.IsDir() && nameInArchive == "" {
 				return nil
+			}
+
+			var linkTarget string
+			if info.Mode()&os.ModeSymlink != 0 {
+				linkTarget, err = symlinkFn(path)
+				if err != nil {
+					return err
+				}
 			}
 
 			fileInfos = append(fileInfos, archives.FileInfo{
