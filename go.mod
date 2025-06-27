@@ -46,7 +46,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
+	github.com/go-viper/mapstructure/v2 v2.3.0 // indirect
 	github.com/golang/geo v0.0.0-20250411042641-97e19c1a7ce7 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
