@@ -12,8 +12,11 @@ import("dayjs/locale/pt");
 import("dayjs/locale/ru");
 import("dayjs/locale/tr");
 import("dayjs/locale/uk");
+import("dayjs/locale/vi");
 import("dayjs/locale/zh-cn");
-import("dayjs/locale/zh");
+import("dayjs/locale/zh-tw");
+import("dayjs/locale/cs");
+import("dayjs/locale/nb");
 
 // All i18n resources specified in the plugin `include` option can be loaded
 // at once using the import syntax
@@ -66,8 +69,47 @@ export function detectLocale() {
     case /^uk.*/i.test(locale):
       locale = "uk_UA";
       break;
-    case /^zh.*/i.test(locale):
-      locale = "zh_CN";
+    case /^de\b/.test(locale):
+      locale = "de";
+      break;
+    case /^ro\b/.test(locale):
+      locale = "ro";
+      break;
+    case /^ru\b/.test(locale):
+      locale = "ru";
+      break;
+    case /^pl\b/.test(locale):
+      locale = "pl";
+      break;
+    case /^ko\b/.test(locale):
+      locale = "ko";
+      break;
+    case /^sk\b/.test(locale):
+      locale = "sk";
+      break;
+    case /^tr\b/.test(locale):
+      locale = "tr";
+      break;
+    case /^uk\b/.test(locale):
+      locale = "uk";
+      break;
+    case /^vi\b/.test(locale):
+      locale = "vi";
+      break;
+    case /^sv-se\b/.test(locale):
+    case /^sv\b/.test(locale):
+      locale = "sv";
+      break;
+    case /^nl-be\b/.test(locale):
+      locale = "nl-be";
+      break;
+    case /^nb\b/.test(locale):
+    case /^no\b/.test(locale):
+      locale = "no";
+      break;
+    case /^nb\b/.test(locale):
+    case /^no\b/.test(locale):
+      locale = "no";
       break;
     default:
       locale = "en_GB";

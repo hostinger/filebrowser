@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/afero"
 
 	fbErrors "github.com/filebrowser/filebrowser/v2/errors"
-	"github.com/filebrowser/filebrowser/v2/files"
 	"github.com/filebrowser/filebrowser/v2/fileutils"
 )
 
@@ -62,7 +61,7 @@ func Unarchive(ctx context.Context, src, dst string, afs afero.Fs, overwrite boo
 			return fbErrors.ErrExist
 		}
 
-		if err := afs.MkdirAll(filepath.Dir(fullpath), files.PermDir); err != nil {
+		if err := afs.MkdirAll(filepath.Dir(fullpath), fs.ModeDir); err != nil {
 			return fmt.Errorf("extract mkdir: %w", err)
 		}
 
@@ -121,7 +120,7 @@ func Archive(ctx context.Context, afs afero.Fs, archive, algo string, filenames 
 		return fbErrors.ErrExist
 	}
 
-	err = afs.MkdirAll(filepath.Dir(archive), files.PermDir)
+	err = afs.MkdirAll(filepath.Dir(archive), fs.ModeDir)
 	if err != nil {
 		return err
 	}
@@ -156,7 +155,7 @@ func GatherFiles(afs afero.Fs, filenames []string) ([]archives.FileInfo, error) 
 			}
 
 			var linkTarget string
-			if info.Mode()&os.ModeSymlink != 0 {
+			if info.Mode()&fs.ModeSymlink != 0 {
 				linkTarget, err = symlinkFn(path)
 				if err != nil {
 					return err

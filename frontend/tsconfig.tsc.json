@@ -5,10 +5,10 @@
   "exclude": [
     "src/components/Shell.vue",
     "src/components/prompts/Copy.vue",
+    "src/components/prompts/Move.vue",
     "src/components/prompts/Delete.vue",
     "src/components/prompts/FileList.vue",
     "src/components/prompts/Rename.vue",
-    "src/components/prompts/Share.vue",
-    "src/components/prompts/UploadFiles.vue"
+    "src/components/prompts/Share.vue"
   ]
 }

@@ -10,6 +10,7 @@ export const useFileStore = defineStore("file", {
     multiple: boolean;
     isFiles: boolean;
     diskUsages: Map<string, DiskUsage>;
+    preselect: string | null;
   } => ({
     req: null,
     oldReq: null,
@@ -18,6 +19,7 @@ export const useFileStore = defineStore("file", {
     multiple: false,
     isFiles: false,
     diskUsages: new Map<string, DiskUsage>(),
+    preselect: null,
   }),
   getters: {
     selectedCount: (state) => state.selected.length,
