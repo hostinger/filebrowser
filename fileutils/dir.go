@@ -2,7 +2,7 @@ package fileutils
 
 import (
 	"errors"
-	"os"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/spf13/afero"
@@ -11,20 +11,20 @@ import (
 // CopyDir copies a directory from source to dest and all
 // of its sub-directories. It doesn't stop if it finds an error
 // during the copy. Returns an error if any.
-func CopyDir(fs afero.Fs, source, dest string) error {
+func CopyDir(afs afero.Fs, source, dest string, fileMode, dirMode fs.FileMode) error {
 	// Get properties of source.
-	srcinfo, err := fs.Stat(source)
+	srcinfo, err := afs.Stat(source)
 	if err != nil {
 		return err
 	}
 
 	// Create the destination directory.
-	err = fs.MkdirAll(dest, srcinfo.Mode())
+	err = afs.MkdirAll(dest, srcinfo.Mode())
 	if err != nil {
 		return err
 	}
 
-	dir, _ := fs.Open(source)
+	dir, _ := afs.Open(source)
 	obs, err := dir.Readdir(-1)
 	if err != nil {
 		return err
@@ -38,13 +38,13 @@ func CopyDir(fs afero.Fs, source, dest string) error {
 
 		if obj.IsDir() {
 			// Create sub-directories, recursively.
-			err = CopyDir(fs, fsource, fdest)
+			err = CopyDir(afs, fsource, fdest, fileMode, dirMode)
 			if err != nil {
 				errs = append(errs, err)
 			}
 		} else {
 			// Perform the file copy.
-			err = CopyFile(fs, fsource, fdest)
+			err = CopyFile(afs, fsource, fdest, fileMode, dirMode)
 			if err != nil {
 				errs = append(errs, err)
 			}
@@ -64,20 +64,20 @@ func CopyDir(fs afero.Fs, source, dest string) error {
 }
 
 // Same as CopyDir, but checks scope in symlinks
-func CopyDirScoped(fs afero.Fs, source, dest, scope string) error {
+func CopyDirScoped(afs afero.Fs, source, dest string, fileMode, dirMode fs.FileMode, scope string) error {
 	// Get properties of source.
-	srcinfo, err := fs.Stat(source)
+	srcinfo, err := afs.Stat(source)
 	if err != nil {
 		return err
 	}
 
 	// Create the destination directory.
-	err = fs.MkdirAll(dest, srcinfo.Mode())
+	err = afs.MkdirAll(dest, srcinfo.Mode())
 	if err != nil {
 		return err
 	}
 
-	dir, _ := fs.Open(source)
+	dir, _ := afs.Open(source)
 	obs, err := dir.Readdir(-1)
 	if err != nil {
 		return err
@@ -89,19 +89,19 @@ func CopyDirScoped(fs afero.Fs, source, dest, scope string) error {
 		fsource := source + "/" + obj.Name()
 		fdest := dest + "/" + obj.Name()
 
-		switch obj.Mode() & os.ModeType {
-		case os.ModeDir:
+		switch obj.Mode() & fs.ModeType {
+		case fs.ModeDir:
 			// Create sub-directories, recursively.
-			if err := CopyDirScoped(fs, fsource, fdest, scope); err != nil {
+			if err := CopyDirScoped(afs, fsource, fdest, fileMode, dirMode, scope); err != nil {
 				errs = append(errs, err)
 			}
-		case os.ModeSymlink:
-			if err := CopySymLinkScoped(fs, fsource, fdest, scope); err != nil {
+		case fs.ModeSymlink:
+			if err := CopySymLinkScoped(afs, fsource, fdest, scope); err != nil {
 				return err
 			}
 		default:
 			// Perform the file copy.
-			if err := CopyFile(fs, fsource, fdest); err != nil {
+			if err := CopyFile(afs, fsource, fdest, fileMode, dirMode); err != nil {
 				errs = append(errs, err)
 			}
 		}
@@ -119,8 +119,8 @@ func CopyDirScoped(fs afero.Fs, source, dest, scope string) error {
 	return nil
 }
 
-func DiskUsage(fs afero.Fs, path string) (size, inodes int64, err error) {
-	lst, ok := fs.(afero.Lstater)
+func DiskUsage(afs afero.Fs, path string) (size, inodes int64, err error) {
+	lst, ok := afs.(afero.Lstater)
 	if !ok {
 		return 0, 0, err
 	}
@@ -138,14 +138,14 @@ func DiskUsage(fs afero.Fs, path string) (size, inodes int64, err error) {
 		return size, inodes, err
 	}
 
-	afs := &afero.Afero{Fs: fs}
-	dir, err := afs.ReadDir(path)
+	af := &afero.Afero{Fs: afs}
+	dir, err := af.ReadDir(path)
 	if err != nil {
 		return size, inodes, err
 	}
 
 	for _, fi := range dir {
-		s, i, e := DiskUsage(fs, filepath.Join(path, fi.Name()))
+		s, i, e := DiskUsage(afs, filepath.Join(path, fi.Name()))
 		if e == nil {
 			size += s
 			inodes += i

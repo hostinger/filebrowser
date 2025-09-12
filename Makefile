@@ -3,6 +3,14 @@ include tools.mk
 
 LDFLAGS += -X "$(MODULE)/version.Version=$(VERSION)" -X "$(MODULE)/version.CommitSHA=$(VERSION_HASH)"
 
+SITE_DOCKER_FLAGS = \
+	-v $(CURDIR)/www:/docs \
+	-v $(CURDIR)/LICENSE:/docs/docs/LICENSE \
+	-v $(CURDIR)/SECURITY.md:/docs/docs/security.md \
+	-v $(CURDIR)/CHANGELOG.md:/docs/docs/changelog.md \
+	-v $(CURDIR)/CODE-OF-CONDUCT.md:/docs/docs/code-of-conduct.md \
+	-v $(CURDIR)/CONTRIBUTING.md:/docs/docs/contributing.md
+
 ## Build:
 
 .PHONY: build
@@ -49,9 +57,25 @@ clean: clean-tools ## Clean
 
 ## Release:
 
+.PHONY: build-release-bin
+build-release-bin: build-frontend
+	GO111MODULE=on GOOS=linux GOARCH=amd64 $(go) build -trimpath -ldflags '$(LDFLAGS)' -o bin/filebrowser-$(VERSION)
+	tar -C bin -czf "dist/filebrowser-$(VERSION).tar.gz" "filebrowser-$(VERSION)"
+
 .PHONY: bump-version
 bump-version: $(standard-version) ## Bump app version
 	$Q ./scripts/bump_version.sh
+
+.PHONY: site
+site: ## Build site
+	@rm -rf www/public
+	docker build -f www/Dockerfile --progress=plain -t filebrowser.site www
+	docker run --rm $(SITE_DOCKER_FLAGS) filebrowser.site build -d "public"
+
+.PHONY: site-serve
+site-serve: ## Serve site for development
+	docker build -f www/Dockerfile --progress=plain -t filebrowser.site www
+	docker run --rm -it -p 8000:8000 $(SITE_DOCKER_FLAGS) filebrowser.site
 
 ## Help:
 help: ## Show this help
@@ -67,8 +91,3 @@ help: ## Show this help
 		if (/^[a-zA-Z_-]+:.*?##.*$$/) {printf "    ${YELLOW}%-20s${GREEN}%s${RESET}\n", $$1, $$2} \
 		else if (/^## .*$$/) {printf "  ${CYAN}%s${RESET}\n", substr($$1,4)} \
 		}' $(MAKEFILE_LIST)
-
-.PHONY: build-release-bin
-build-release-bin: build-frontend
-	GO111MODULE=on GOOS=linux GOARCH=amd64 $(go) build -trimpath -ldflags '$(LDFLAGS)' -o bin/filebrowser-$(VERSION)
-	tar -C bin -czf "dist/filebrowser-$(VERSION).tar.gz" "filebrowser-$(VERSION)"
