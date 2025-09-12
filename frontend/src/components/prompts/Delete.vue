@@ -59,9 +59,9 @@ export default {
       "selectedCount",
       "req",
       "selected",
-      "currentPrompt",
     ]),
-    ...mapWritableState(useFileStore, ["reload"]),
+    ...mapState(useLayoutStore, ["currentPrompt"]),
+    ...mapWritableState(useFileStore, ["reload", "preselect"]),
     trashBinCheckbox() {
       if (trashDir === "") {
         return false;
@@ -90,7 +90,6 @@ export default {
     submit: async function () {
       buttons.loading("delete");
 
-      window.sessionStorage.setItem("modified", "true");
       try {
         if (!this.isListing) {
           await api.remove(this.$route.path, this.skipTrash);
@@ -114,6 +113,12 @@ export default {
 
         await Promise.all(promises);
         buttons.success("delete");
+
+        const nearbyItem =
+          this.req.items[Math.max(0, Math.min(this.selected) - 1)];
+
+        this.preselect = nearbyItem?.path;
+
         this.reload = true;
         this.fetchQuota(3000);
       } catch (e) {

@@ -4,35 +4,34 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
+	"io/fs"
 	"math/big"
 	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/spf13/afero"
-
-	"github.com/filebrowser/filebrowser/v2/files"
 )
 
 // MoveFile moves file from src to dst.
 // By default the rename filesystem system call is used. If src and dst point to different volumes
 // the file copy is used as a fallback
-func MoveFile(fs afero.Fs, src, dst string) error {
-	if fs.Rename(src, dst) == nil {
+func MoveFile(afs afero.Fs, src, dst string, fileMode, dirMode fs.FileMode) error {
+	if afs.Rename(src, dst) == nil {
 		return nil
 	}
 
-	if info, err := fs.Stat(src); err == nil && info.IsDir() {
-		return CopyFolder(fs, src, dst)
+	if info, err := afs.Stat(src); err == nil && info.IsDir() {
+		return CopyFolder(afs, src, dst)
 	}
 
 	// fallback
-	err := Copy(fs, src, dst)
+	err := Copy(afs, src, dst, fileMode, dirMode)
 	if err != nil {
-		_ = fs.Remove(dst)
+		_ = afs.Remove(dst)
 		return err
 	}
-	if err := fs.RemoveAll(src); err != nil {
+	if err := afs.RemoveAll(src); err != nil {
 		return err
 	}
 	return nil
@@ -40,9 +39,9 @@ func MoveFile(fs afero.Fs, src, dst string) error {
 
 // CopyFile copies a file from source to dest and returns
 // an error if any.
-func CopyFile(fs afero.Fs, source, dest string) error {
+func CopyFile(afs afero.Fs, source, dest string, fileMode, dirMode fs.FileMode) error {
 	// Open the source file.
-	src, err := fs.Open(source)
+	src, err := afs.Open(source)
 	if err != nil {
 		return err
 	}
@@ -50,13 +49,13 @@ func CopyFile(fs afero.Fs, source, dest string) error {
 
 	// Makes the directory needed to create the dst
 	// file.
-	err = fs.MkdirAll(filepath.Dir(dest), files.PermDir)
+	err = afs.MkdirAll(filepath.Dir(dest), dirMode)
 	if err != nil {
 		return err
 	}
 
 	// Create the destination file.
-	dst, err := fs.OpenFile(dest, os.O_RDWR|os.O_CREATE|os.O_TRUNC, files.PermFile)
+	dst, err := afs.OpenFile(dest, os.O_RDWR|os.O_CREATE|os.O_TRUNC, fileMode)
 	if err != nil {
 		return err
 	}
@@ -69,11 +68,11 @@ func CopyFile(fs afero.Fs, source, dest string) error {
 	}
 
 	// Copy the mode
-	info, err := fs.Stat(source)
+	info, err := afs.Stat(source)
 	if err != nil {
 		return err
 	}
-	err = fs.Chmod(dest, info.Mode())
+	err = afs.Chmod(dest, info.Mode())
 	if err != nil {
 		return err
 	}
