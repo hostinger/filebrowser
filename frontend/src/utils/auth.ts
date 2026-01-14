@@ -2,7 +2,13 @@ import { useAuthStore } from "@/stores/auth";
 import router from "@/router";
 import type { JwtPayload } from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
-import { authMethod, baseURL, noAuth, logoutPage } from "./constants";
+import {
+  authMethod,
+  baseURL,
+  noAuth,
+  logoutPage,
+  authLogoutURL,
+} from "./constants";
 import { StatusError } from "@/api/utils";
 import { setSafeTimeout } from "@/api/utils";
 
@@ -124,6 +130,21 @@ export function logout(reason?: string) {
   localStorage.setItem("jwt", "");
   if (noAuth) {
     window.location.reload();
+  } else if (authMethod === "proxy" && authLogoutURL !== "") {
+    // Hostinger specific
+    fetch(authLogoutURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .catch(() => {
+      console.error("Failed to logout using proxy auth");
+    });
+
+    router.push({
+      path: "/login",
+    });
   } else if (logoutPage !== "/login") {
     document.location.href = `${logoutPage}`;
   } else {
