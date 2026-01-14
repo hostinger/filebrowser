@@ -20,7 +20,7 @@
     :aria-label="name"
     :aria-selected="isSelected"
     :data-ext="getExtension(name).toLowerCase()"
-    @contextmenu.prevent="contextMenu"
+    @contextmenu="contextMenu"
   >
     <div>
       <img
@@ -53,9 +53,6 @@
 import { useAuthStore } from "@/stores/auth";
 import { useFileStore } from "@/stores/file";
 import { useLayoutStore } from "@/stores/layout";
-import { useContextMenuStore } from "@/stores/contextMenu";
-
-import { eventPosition } from "@/utils/event";
 import { enableThumbs } from "@/utils/constants";
 import { filesize } from "@/utils";
 import dayjs from "dayjs";
@@ -97,7 +94,6 @@ const props = defineProps<{
 const authStore = useAuthStore();
 const fileStore = useFileStore();
 const layoutStore = useLayoutStore();
-const contextMenuStore = useContextMenuStore();
 
 const { diskUsages } = storeToRefs(fileStore);
 
@@ -310,6 +306,17 @@ const itemClick = (event: Event | KeyboardEvent) => {
   else click(event);
 };
 
+const contextMenu = (event: MouseEvent) => {
+  event.preventDefault();
+  if (
+    fileStore.selected.length === 0 ||
+    event.ctrlKey ||
+    fileStore.selected.indexOf(props.index) === -1
+  ) {
+    click(event);
+  }
+};
+
 const click = (event: Event | KeyboardEvent) => {
   if (!singleClick.value && fileStore.selectedCount !== 0)
     event.preventDefault();
@@ -324,7 +331,15 @@ const click = (event: Event | KeyboardEvent) => {
   }
 
   if (fileStore.selected.indexOf(props.index) !== -1) {
-    fileStore.removeSelected(props.index);
+    if (
+      (event as KeyboardEvent).ctrlKey ||
+      (event as KeyboardEvent).metaKey ||
+      fileStore.multiple
+    ) {
+      fileStore.removeSelected(props.index);
+    } else {
+      fileStore.selected = [props.index];
+    }
     return;
   }
 
@@ -350,7 +365,6 @@ const click = (event: Event | KeyboardEvent) => {
   }
 
   if (
-    !singleClick.value &&
     !(event as KeyboardEvent).ctrlKey &&
     !(event as KeyboardEvent).metaKey &&
     !fileStore.multiple
@@ -370,18 +384,6 @@ const getExtension = (fileName: string): string => {
     return fileName;
   }
   return fileName.substring(lastDotIndex);
-};
-
-const contextMenu = (event: MouseEvent) => {
-  contextMenuStore.hide();
-
-  if (fileStore.selected.indexOf(props.index) === -1) {
-    fileStore.selected = [props.index];
-  }
-
-  const pos = eventPosition(event);
-
-  contextMenuStore.show(pos.x + 2, pos.y);
 };
 
 // Long-press helper functions

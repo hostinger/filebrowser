@@ -89,6 +89,7 @@
     </template>
     <template v-else>
       <router-link
+        v-if="!hideLoginButton"
         class="action"
         to="/login"
         :aria-label="$t('sidebar.login')"
@@ -151,9 +152,11 @@ import Quota from "./Quota.vue";
 import {
   version,
   signup,
+  hideLoginButton,
   disableExternal,
   disableUsedPercentage,
   noAuth,
+  logoutPage,
   loginPage,
   tmpDir,
   trashDir,
@@ -185,10 +188,11 @@ export default {
       return this.currentPromptName === "sidebar";
     },
     signup: () => signup,
+    hideLoginButton: () => hideLoginButton,
     version: () => version,
     disableExternal: () => disableExternal,
     disableUsedPercentage: () => disableUsedPercentage,
-    canLogout: () => !noAuth && loginPage,
+    canLogout: () => !noAuth && (loginPage || logoutPage !== "/login"),
     tmpDir: () => tmpDir,
     trashDir: () => trashDir,
     quotaExists: () => quotaExists,

@@ -1,4 +1,4 @@
-package http
+package fbhttp
 
 import (
 	"context"
@@ -254,6 +254,12 @@ func tusPatchHandler() handleFunc {
 		bytesWritten, err := io.Copy(openFile, r.Body)
 		if err != nil {
 			return http.StatusInternalServerError, fmt.Errorf("could not write to file: %w", err)
+		}
+
+		// Sync the file to ensure all data is written to storage
+		// to prevent file corruption.
+		if err := openFile.Sync(); err != nil {
+			return http.StatusInternalServerError, fmt.Errorf("could not sync file: %w", err)
 		}
 
 		newOffset := uploadOffset + bytesWritten

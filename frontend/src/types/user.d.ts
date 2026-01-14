@@ -10,9 +10,11 @@ interface IUser {
   lockPassword: boolean;
   hideDotfiles: boolean;
   singleClick: boolean;
+  redirectAfterCopyMove: boolean;
   dateFormat: boolean;
   viewMode: ViewModeType;
   sorting?: Sorting;
+  aceEditorTheme: string;
 }
 
 type ViewModeType = "list" | "mosaic" | "mosaic gallery";
@@ -29,6 +31,7 @@ interface IUserForm {
   lockPassword?: boolean;
   hideDotfiles?: boolean;
   singleClick?: boolean;
+  redirectAfterCopyMove?: boolean;
   dateFormat?: boolean;
 }
 

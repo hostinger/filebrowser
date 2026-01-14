@@ -1,4 +1,4 @@
-package http
+package fbhttp
 
 import (
 	"encoding/json"
@@ -42,6 +42,7 @@ func handleWithStaticData(w http.ResponseWriter, _ *http.Request, d *data, fSys 
 		"NoAuth":                d.settings.AuthMethod == auth.MethodNoAuth,
 		"AuthMethod":            d.settings.AuthMethod,
 		"AuthLogoutURL":         d.settings.AuthLogoutURL,
+		"LogoutPage":            d.settings.LogoutPage,
 		"LoginPage":             auther.LoginPage(),
 		"CSS":                   false,
 		"ReCaptcha":             false,
@@ -50,11 +51,12 @@ func handleWithStaticData(w http.ResponseWriter, _ *http.Request, d *data, fSys 
 		"ResizePreview":         d.server.ResizePreview,
 		"EnableExec":            d.server.EnableExec,
 		"TusSettings":           d.settings.Tus,
+		"HideLoginButton":       d.settings.HideLoginButton,
 	}
 
 	if d.settings.Branding.Files != "" {
 		fPath := filepath.Join(d.settings.Branding.Files, "custom.css")
-		_, err := os.Stat(fPath) //nolint:govet
+		_, err := os.Stat(fPath)
 
 		if err != nil && !os.IsNotExist(err) {
 			log.Printf("couldn't load custom styles: %v", err)
@@ -66,7 +68,7 @@ func handleWithStaticData(w http.ResponseWriter, _ *http.Request, d *data, fSys 
 	}
 
 	if d.settings.AuthMethod == auth.MethodJSONAuth {
-		raw, err := d.store.Auth.Get(d.settings.AuthMethod) //nolint:govet
+		raw, err := d.store.Auth.Get(d.settings.AuthMethod)
 		if err != nil {
 			return http.StatusInternalServerError, err
 		}
