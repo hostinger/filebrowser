@@ -41,12 +41,12 @@ export function download(
   let url = `${baseURL}/api/public/dl/${hash}`;
 
   if (files.length === 1) {
-    url += files[0] + "?";
+    url += encodeURIComponent(files[0]) + "?";
   } else {
     let arg = "";
 
     for (const file of files) {
-      arg += file + ",";
+      arg += encodeURIComponent(file) + ",";
     }
 
     arg = arg.substring(0, arg.length - 1);

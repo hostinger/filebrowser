@@ -47,12 +47,7 @@
     "update": "Update",
     "upload": "Upload",
     "openFile": "Open file",
-    "discardChanges": "Discard",
-    "stopSearch": "Stop searching",
-    "saveChanges": "Save changes",
-    "editAsText": "Edit as Text",
-    "increaseFontSize": "Increase font size",
-    "decreaseFontSize": "Decrease font size"
+    "discardChanges": "Discard"
   },
   "download": {
     "downloadFile": "Download File",
@@ -87,20 +82,11 @@
     "metadata": "Metadata",
     "multipleSelectionEnabled": "Multiple selection enabled",
     "name": "Name",
+    "noPreview": "Preview is not available for this file.",
     "size": "Size",
     "sortByLastModified": "Sort by last modified",
     "sortByName": "Sort by name",
-    "sortBySize": "Sort by size",
-    "noPreview": "Preview is not available for this file.",
-    "csvTooLarge": "CSV file is too large for preview (>5MB). Please download to view.",
-    "csvLoadFailed": "Failed to load CSV file.",
-    "showingRows": "Showing {count} row(s)",
-    "columnSeparator": "Column Separator",
-    "csvSeparators": {
-      "comma": "Comma (,)",
-      "semicolon": "Semicolon (;)",
-      "both": "Both (,) and (;)"
-    }
+    "sortBySize": "Sort by size"
   },
   "help": {
     "click": "select file or directory",
@@ -126,11 +112,7 @@
     "submit": "Login",
     "username": "Username",
     "usernameTaken": "Username already taken",
-    "wrongCredentials": "Wrong credentials",
-    "passwordTooShort": "Password must be at least {min} characters",
-    "logout_reasons": {
-      "inactivity": "You have been logged out due to inactivity."
-    }
+    "wrongCredentials": "Wrong credentials"
   },
   "permanent": "Permanent",
   "prompts": {
@@ -207,7 +189,6 @@
     "video": "Video"
   },
   "settings": {
-    "aceEditorTheme": "Ace editor theme",
     "admin": "Admin",
     "administrator": "Administrator",
     "allowCommands": "Execute commands",
@@ -215,7 +196,6 @@
     "allowNew": "Create new files and directories",
     "allowPublish": "Publish new posts and pages",
     "allowSignup": "Allow users to signup",
-    "hideLoginButton": "Hide the login button from public pages",
     "avoidChanges": "(leave blank to avoid changes)",
     "branding": "Branding",
     "brandingDirectoryPath": "Branding directory path",
@@ -267,7 +247,6 @@
     "permissions": "Permissions",
     "permissionsHelp": "You can set the user to be an administrator or choose the permissions individually. If you select \"Administrator\", all of the other options will be automatically checked. The management of users remains a privilege of an administrator.\n",
     "profileSettings": "Profile Settings",
-    "redirectAfterCopyMove": "Redirect to destination after copy/move",
     "ruleExample1": "prevents the access to any dotfile (such as .git, .gitignore) in every folder.\n",
     "ruleExample2": "blocks the access to the file named Caddyfile on the root of the scope.",
     "rules": "Rules",
@@ -294,8 +273,7 @@
     "userManagement": "User Management",
     "username": "Username",
     "users": "Users",
-    "userUpdated": "User updated!",
-    "currentPassword": "Your Current Password"
+    "userUpdated": "User updated!"
   },
   "sidebar": {
     "help": "Help",

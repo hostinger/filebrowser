@@ -1,4 +1,6 @@
 .md_preview {
+  overflow-y: auto;
+  max-height: 80vh;
   padding: 1rem;
   border: 1px solid #000;
   font-size: 20px;
@@ -7,5 +9,5 @@
 
 #preview-container {
   overflow: auto;
-  flex: 1;
+  max-height: 80vh; /* Match the max-height of md_preview for scrolling */
 }

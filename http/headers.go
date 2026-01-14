@@ -1,6 +1,7 @@
 //go:build !dev
+// +build !dev
 
-package fbhttp
+package http
 
 // global headers to append to every response
 var globalHeaders = map[string]string{

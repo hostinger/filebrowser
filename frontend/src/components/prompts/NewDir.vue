@@ -14,7 +14,6 @@
         v-model.trim="name"
         tabindex="1"
       />
-      <CreateFilePath :name="name" :is-dir="true" />
     </div>
 
     <div class="card-action">
@@ -50,7 +49,6 @@ import { files as api } from "@/api";
 import url from "@/utils/url";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import CreateFilePath from "@/components/prompts/CreateFilePath.vue";
 
 const $showError = inject<IToastError>("$showError")!;
 

@@ -1,4 +1,4 @@
-package fbhttp
+package http
 
 import (
 	"encoding/json"
@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	libErrors "github.com/filebrowser/filebrowser/v2/errors"
-	imgErrors "github.com/filebrowser/filebrowser/v2/img"
 )
 
 func renderJSON(w http.ResponseWriter, _ *http.Request, data interface{}) (int, error) {
@@ -43,8 +42,6 @@ func errToStatus(err error) int {
 		return http.StatusBadRequest
 	case errors.Is(err, libErrors.ErrRootUserDeletion):
 		return http.StatusForbidden
-	case errors.Is(err, imgErrors.ErrImageTooLarge):
-		return http.StatusRequestEntityTooLarge
 	default:
 		return http.StatusInternalServerError
 	}

@@ -1,7 +1,6 @@
 package search
 
 import (
-	"context"
 	"os"
 	"path"
 	"path/filepath"
@@ -19,17 +18,13 @@ type searchOptions struct {
 }
 
 // Search searches for a query in a fs.
-func Search(ctx context.Context,
-	fs afero.Fs, scope, query string, checker rules.Checker, found func(path string, f os.FileInfo) error) error {
+func Search(fs afero.Fs, scope, query string, checker rules.Checker, found func(path string, f os.FileInfo) error) error {
 	search := parseSearch(query)
 
 	scope = filepath.ToSlash(filepath.Clean(scope))
 	scope = path.Join("/", scope)
 
 	return afero.Walk(fs, scope, func(fPath string, f os.FileInfo, _ error) error {
-		if ctx.Err() != nil {
-			return context.Cause(ctx)
-		}
 		fPath = filepath.ToSlash(filepath.Clean(fPath))
 		fPath = path.Join("/", fPath)
 		relativePath := strings.TrimPrefix(fPath, scope)

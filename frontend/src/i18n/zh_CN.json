@@ -47,12 +47,7 @@
     "update": "更新",
     "upload": "上传",
     "openFile": "打开文件",
-    "discardChanges": "放弃更改",
-    "stopSearch": "Stop searching",
-    "saveChanges": "保存更改",
-    "editAsText": "以文本形式编辑",
-    "increaseFontSize": "增大字体大小",
-    "decreaseFontSize": "减小字体大小"
+    "discardChanges": "放弃更改"
   },
   "download": {
     "downloadFile": "下载文件",
@@ -87,20 +82,11 @@
     "metadata": "元数据",
     "multipleSelectionEnabled": "多选模式已开启",
     "name": "名称",
+    "noPreview": "此文件暂时不支持预览。",
     "size": "大小",
     "sortByLastModified": "按最后修改时间排序",
     "sortByName": "按名称排序",
-    "sortBySize": "按大小排序",
-    "noPreview": "此文件无法预览。",
-    "csvTooLarge": "CSV文件大到无法预览(>5MB)。请下载查看。",
-    "csvLoadFailed": "加载 CSV 文件失败。",
-    "showingRows": "正在显示 {count} 行",
-    "columnSeparator": "列分隔符",
-    "csvSeparators": {
-      "comma": "逗号 (,)",
-      "semicolon": "分号 (;)",
-      "both": "逗号 (,) 和分号 (;)"
-    }
+    "sortBySize": "按大小排序"
   },
   "help": {
     "click": "选择文件或文件夹",
@@ -126,11 +112,7 @@
     "submit": "登录",
     "username": "用户名",
     "usernameTaken": "用户名已经被使用",
-    "wrongCredentials": "用户名或密码错误",
-    "passwordTooShort": "密码必须至少包含 {min} 个字符",
-    "logout_reasons": {
-      "inactivity": "由于未活动，您已登出。"
-    }
+    "wrongCredentials": "用户名或密码错误"
   },
   "permanent": "永久",
   "prompts": {
@@ -207,7 +189,6 @@
     "video": "视频"
   },
   "settings": {
-    "aceEditorTheme": "Ace编辑器主题",
     "admin": "管理员",
     "administrator": "管理员",
     "allowCommands": "执行命令（Shell 命令）",
@@ -215,7 +196,6 @@
     "allowNew": "创建新文件和文件夹",
     "allowPublish": "发布新的帖子与页面",
     "allowSignup": "允许用户注册",
-    "hideLoginButton": "从公开页面隐藏登录按钮",
     "avoidChanges": "（留空以避免更改）",
     "branding": "品牌",
     "brandingDirectoryPath": "品牌信息文件夹路径",
@@ -293,8 +273,7 @@
     "userManagement": "用户管理",
     "username": "用户名",
     "users": "用户",
-    "userUpdated": "用户已更新！",
-    "currentPassword": "Your Current Password"
+    "userUpdated": "用户已更新！"
   },
   "sidebar": {
     "help": "帮助",
