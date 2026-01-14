@@ -5,6 +5,7 @@
     </div>
 
     <div class="card-content">
+      <p>{{ $t("prompts.moveMessage") }}</p>
       <file-list
         ref="fileList"
         @update:selected="(val) => (dest = val)"
@@ -78,7 +79,7 @@ export default {
   computed: {
     ...mapState(useFileStore, ["req", "selected"]),
     ...mapState(useAuthStore, ["user"]),
-    ...mapWritableState(useFileStore, ["preselect"]),
+    ...mapWritableState(useFileStore, ["reload", "preselect"]),
     excludedFolders() {
       return this.selected
         .filter((idx) => this.req.items[idx].isDir)
@@ -107,7 +108,9 @@ export default {
           .then(() => {
             buttons.success("move");
             this.preselect = removePrefix(items[0].to);
-            this.$router.push({ path: this.dest });
+            if (this.user.redirectAfterCopyMove)
+              this.$router.push({ path: this.dest });
+            else this.reload = true;
           })
           .catch((e) => {
             buttons.done("move");
