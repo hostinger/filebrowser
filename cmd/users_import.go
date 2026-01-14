@@ -25,8 +25,7 @@ file. You can use this command to import new users to your
 installation. For that, just don't place their ID on the files
 list or set it to 0.`,
 	Args: jsonYamlArg,
-	RunE: withStore(func(cmd *cobra.Command, args []string, st *store) error {
-		flags := cmd.Flags()
+	RunE: python(func(cmd *cobra.Command, args []string, d *pythonData) error {
 		fd, err := os.Open(args[0])
 		if err != nil {
 			return err
@@ -46,13 +45,13 @@ list or set it to 0.`,
 			}
 		}
 
-		replace, err := flags.GetBool("replace")
+		replace, err := getBool(cmd.Flags(), "replace")
 		if err != nil {
 			return err
 		}
 
 		if replace {
-			oldUsers, userImportErr := st.Users.Gets("")
+			oldUsers, userImportErr := d.store.Users.Gets("")
 			if userImportErr != nil {
 				return userImportErr
 			}
@@ -63,20 +62,20 @@ list or set it to 0.`,
 			}
 
 			for _, user := range oldUsers {
-				err = st.Users.Delete(user.ID)
+				err = d.store.Users.Delete(user.ID)
 				if err != nil {
 					return err
 				}
 			}
 		}
 
-		overwrite, err := flags.GetBool("overwrite")
+		overwrite, err := getBool(cmd.Flags(), "overwrite")
 		if err != nil {
 			return err
 		}
 
 		for _, user := range list {
-			onDB, err := st.Users.Get("", user.ID)
+			onDB, err := d.store.Users.Get("", user.ID)
 
 			// User exists in DB.
 			if err == nil {
@@ -88,7 +87,7 @@ list or set it to 0.`,
 				// with the new username. If there is, print an error and cancel the
 				// operation
 				if user.Username != onDB.Username {
-					if conflictuous, err := st.Users.Get("", user.Username); err == nil {
+					if conflictuous, err := d.store.Users.Get("", user.Username); err == nil { //nolint:govet
 						return usernameConflictError(user.Username, conflictuous.ID, user.ID)
 					}
 				}
@@ -98,13 +97,13 @@ list or set it to 0.`,
 				user.ID = 0
 			}
 
-			err = st.Users.Save(user)
+			err = d.store.Users.Save(user)
 			if err != nil {
 				return err
 			}
 		}
 		return nil
-	}, storeOptions{}),
+	}, pythonConfig{}),
 }
 
 func usernameConflictError(username string, originalID, newID uint) error {

@@ -8,10 +8,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"slices"
 	"strings"
 
-	fberrors "github.com/filebrowser/filebrowser/v2/errors"
+	fbErrors "github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/files"
 	"github.com/filebrowser/filebrowser/v2/settings"
 	"github.com/filebrowser/filebrowser/v2/users"
@@ -103,7 +102,7 @@ func (a *HookAuth) RunCommand() (string, error) {
 		command[i] = os.Expand(arg, envMapping)
 	}
 
-	cmd := exec.Command(command[0], command[1:]...)
+	cmd := exec.Command(command[0], command[1:]...) //nolint:gosec
 	cmd.Env = append(os.Environ(), fmt.Sprintf("USERNAME=%s", a.Cred.Username))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("PASSWORD=%s", a.Cred.Password))
 	out, err := cmd.Output()
@@ -124,7 +123,7 @@ func (a *HookAuth) GetValues(s string) {
 	s = strings.ReplaceAll(s, "\r\n", "\n")
 
 	// iterate input lines
-	for val := range strings.Lines(s) {
+	for _, val := range strings.Split(s, "\n") {
 		v := strings.SplitN(val, "=", 2)
 
 		// skips non key and value format
@@ -146,7 +145,7 @@ func (a *HookAuth) GetValues(s string) {
 // SaveUser updates the existing user or creates a new one when not found
 func (a *HookAuth) SaveUser() (*users.User, error) {
 	u, err := a.Users.Get(a.Server.Root, a.Cred.Username)
-	if err != nil && !errors.Is(err, fberrors.ErrNotExist) {
+	if err != nil && !errors.Is(err, fbErrors.ErrNotExist) {
 		return nil, err
 	}
 
@@ -158,17 +157,16 @@ func (a *HookAuth) SaveUser() (*users.User, error) {
 
 		// create user with the provided credentials
 		d := &users.User{
-			Username:              a.Cred.Username,
-			Password:              pass,
-			Scope:                 a.Settings.Defaults.Scope,
-			Locale:                a.Settings.Defaults.Locale,
-			ViewMode:              a.Settings.Defaults.ViewMode,
-			SingleClick:           a.Settings.Defaults.SingleClick,
-			RedirectAfterCopyMove: a.Settings.Defaults.RedirectAfterCopyMove,
-			Sorting:               a.Settings.Defaults.Sorting,
-			Perm:                  a.Settings.Defaults.Perm,
-			Commands:              a.Settings.Defaults.Commands,
-			HideDotfiles:          a.Settings.Defaults.HideDotfiles,
+			Username:     a.Cred.Username,
+			Password:     pass,
+			Scope:        a.Settings.Defaults.Scope,
+			Locale:       a.Settings.Defaults.Locale,
+			ViewMode:     a.Settings.Defaults.ViewMode,
+			SingleClick:  a.Settings.Defaults.SingleClick,
+			Sorting:      a.Settings.Defaults.Sorting,
+			Perm:         a.Settings.Defaults.Perm,
+			Commands:     a.Settings.Defaults.Commands,
+			HideDotfiles: a.Settings.Defaults.HideDotfiles,
 		}
 		u = a.GetUser(d)
 
@@ -220,14 +218,13 @@ func (a *HookAuth) GetUser(d *users.User) *users.User {
 		Download: isAdmin || a.Fields.GetBoolean("user.perm.download", d.Perm.Download),
 	}
 	user := users.User{
-		ID:                    d.ID,
-		Username:              d.Username,
-		Password:              d.Password,
-		Scope:                 a.Fields.GetString("user.scope", d.Scope),
-		Locale:                a.Fields.GetString("user.locale", d.Locale),
-		ViewMode:              users.ViewMode(a.Fields.GetString("user.viewMode", string(d.ViewMode))),
-		SingleClick:           a.Fields.GetBoolean("user.singleClick", d.SingleClick),
-		RedirectAfterCopyMove: a.Fields.GetBoolean("user.redirectAfterCopyMove", d.RedirectAfterCopyMove),
+		ID:          d.ID,
+		Username:    d.Username,
+		Password:    d.Password,
+		Scope:       a.Fields.GetString("user.scope", d.Scope),
+		Locale:      a.Fields.GetString("user.locale", d.Locale),
+		ViewMode:    users.ViewMode(a.Fields.GetString("user.viewMode", string(d.ViewMode))),
+		SingleClick: a.Fields.GetBoolean("user.singleClick", d.SingleClick),
 		Sorting: files.Sorting{
 			Asc: a.Fields.GetBoolean("user.sorting.asc", d.Sorting.Asc),
 			By:  a.Fields.GetString("user.sorting.by", d.Sorting.By),
@@ -253,7 +250,6 @@ var validHookFields = []string{
 	"user.locale",
 	"user.viewMode",
 	"user.singleClick",
-	"user.redirectAfterCopyMove",
 	"user.sorting.by",
 	"user.sorting.asc",
 	"user.commands",
@@ -270,7 +266,13 @@ var validHookFields = []string{
 
 // IsValid checks if the provided field is on the valid fields list
 func (hf *hookFields) IsValid(field string) bool {
-	return slices.Contains(validHookFields, field)
+	for _, val := range validHookFields {
+		if field == val {
+			return true
+		}
+	}
+
+	return false
 }
 
 // GetString returns the string value or provided default

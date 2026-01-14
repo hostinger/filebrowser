@@ -8,7 +8,7 @@
     "copy": "Copiar",
     "copyFile": "Copiar archivo",
     "copyToClipboard": "Copiar al portapapeles",
-    "copyDownloadLinkToClipboard": "Copiar enlace de descarga al portapapeles",
+    "copyDownloadLinkToClipboard": "Copy download link to clipboard",
     "create": "Crear",
     "delete": "Borrar",
     "directorySizes": "Calcular los tamaños del directorio",
@@ -47,12 +47,7 @@
     "update": "Actualizar",
     "upload": "Subir",
     "openFile": "Abrir archivo",
-    "discardChanges": "Discard",
-    "stopSearch": "Stop searching",
-    "saveChanges": "Guardar cambios",
-    "editAsText": "Edit as Text",
-    "increaseFontSize": "Increase font size",
-    "decreaseFontSize": "Decrease font size"
+    "discardChanges": "Discard"
   },
   "download": {
     "downloadFile": "Descargar fichero",
@@ -87,20 +82,11 @@
     "metadata": "Metadatos",
     "multipleSelectionEnabled": "Selección múltiple activada",
     "name": "Nombre",
+    "noPreview": "La vista previa no está disponible para este archivo.",
     "size": "Tamaño",
     "sortByLastModified": "Ordenar por última modificación",
     "sortByName": "Ordenar por nombre",
-    "sortBySize": "Ordenar por tamaño",
-    "noPreview": "La vista previa no está disponible para este archivo.",
-    "csvTooLarge": "CSV file is too large for preview (>5MB). Please download to view.",
-    "csvLoadFailed": "Failed to load CSV file.",
-    "showingRows": "Showing {count} row(s)",
-    "columnSeparator": "Column Separator",
-    "csvSeparators": {
-      "comma": "Comma (,)",
-      "semicolon": "Semicolon (;)",
-      "both": "Both (,) and (;)"
-    }
+    "sortBySize": "Ordenar por tamaño"
   },
   "help": {
     "click": "seleccionar archivo o carpeta",
@@ -126,11 +112,7 @@
     "submit": "Iniciar sesión",
     "username": "Usuario",
     "usernameTaken": "Nombre usuario no disponible",
-    "wrongCredentials": "Usuario y/o contraseña incorrectos",
-    "passwordTooShort": "Password must be at least {min} characters",
-    "logout_reasons": {
-      "inactivity": "You have been logged out due to inactivity."
-    }
+    "wrongCredentials": "Usuario y/o contraseña incorrectos"
   },
   "permanent": "Permanente",
   "prompts": {
@@ -197,7 +179,6 @@
     "video": "Vídeo"
   },
   "settings": {
-    "aceEditorTheme": "Ace editor theme",
     "admin": "Admin",
     "administrator": "Administrador",
     "allowCommands": "Ejecutar comandos",
@@ -205,7 +186,6 @@
     "allowNew": "Crear nuevos archivos y carpetas",
     "allowPublish": "Publicar nuevos posts y páginas",
     "allowSignup": "Permitir registro de usuarios",
-    "hideLoginButton": "Hide the login button from public pages",
     "avoidChanges": "(dejar en blanco para evitar cambios)",
     "branding": "Marca",
     "brandingDirectoryPath": "Ruta de la carpeta de personalizacion de marca",
@@ -283,8 +263,7 @@
     "userManagement": "Administración de usuarios",
     "username": "Usuario",
     "users": "Usuarios",
-    "userUpdated": "¡Usuario actualizado!",
-    "currentPassword": "Your Current Password"
+    "userUpdated": "¡Usuario actualizado!"
   },
   "sidebar": {
     "help": "Ayuda",

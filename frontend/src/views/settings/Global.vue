@@ -19,11 +19,6 @@
           </p>
 
           <p>
-            <input type="checkbox" v-model="settings.hideLoginButton" />
-            {{ t("settings.hideLoginButton") }}
-          </p>
-
-          <p>
             <label class="small">{{ t("settings.userHomeBasePath") }}</label>
             <input
               class="input input--block"
@@ -70,7 +65,7 @@
             <a
               class="link"
               target="_blank"
-              href="https://filebrowser.org/configuration.html#custom-branding"
+              href="https://filebrowser.org/configuration.html#command-runner"
               >{{ t("settings.documentation") }}</a
             >
           </i18n-t>

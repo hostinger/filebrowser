@@ -1,4 +1,4 @@
-package fbhttp
+package http
 
 import (
 	"crypto/rand"
@@ -14,7 +14,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	fberrors "github.com/filebrowser/filebrowser/v2/errors"
+	fbErrors "github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/share"
 )
 
@@ -38,7 +38,7 @@ var shareListHandler = withPermShare(func(w http.ResponseWriter, r *http.Request
 	} else {
 		s, err = d.store.Share.FindByUserID(d.user.ID)
 	}
-	if errors.Is(err, fberrors.ErrNotExist) {
+	if errors.Is(err, fbErrors.ErrNotExist) {
 		return renderJSON(w, r, []*share.Link{})
 	}
 
@@ -58,7 +58,7 @@ var shareListHandler = withPermShare(func(w http.ResponseWriter, r *http.Request
 
 var shareGetsHandler = withPermShare(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
 	s, err := d.store.Share.Gets(r.URL.Path, d.user.ID)
-	if errors.Is(err, fberrors.ErrNotExist) {
+	if errors.Is(err, fbErrors.ErrNotExist) {
 		return renderJSON(w, r, []*share.Link{})
 	}
 
@@ -77,16 +77,7 @@ var shareDeleteHandler = withPermShare(func(_ http.ResponseWriter, r *http.Reque
 		return http.StatusBadRequest, nil
 	}
 
-	link, err := d.store.Share.GetByHash(hash)
-	if err != nil {
-		return errToStatus(err), err
-	}
-
-	if link.UserID != d.user.ID && !d.user.Perm.Admin {
-		return http.StatusForbidden, nil
-	}
-
-	err = d.store.Share.Delete(hash)
+	err := d.store.Share.Delete(hash)
 	return errToStatus(err), err
 })
 
@@ -111,6 +102,7 @@ var sharePostHandler = withPermShare(func(w http.ResponseWriter, r *http.Request
 	var expire int64 = 0
 
 	if body.Expires != "" {
+		//nolint:govet
 		num, err := strconv.Atoi(body.Expires)
 		if err != nil {
 			return http.StatusInternalServerError, err

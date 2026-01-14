@@ -14,13 +14,12 @@ var cmdsLsCmd = &cobra.Command{
 	Short: "List all commands for each event",
 	Long:  `List all commands for each event.`,
 	Args:  cobra.NoArgs,
-	RunE: withStore(func(cmd *cobra.Command, _ []string, st *store) error {
-		s, err := st.Settings.Get()
+	RunE: python(func(cmd *cobra.Command, _ []string, d *pythonData) error {
+		s, err := d.store.Settings.Get()
 		if err != nil {
 			return err
 		}
-
-		evt, err := cmd.Flags().GetString("event")
+		evt, err := getString(cmd.Flags(), "event")
 		if err != nil {
 			return err
 		}
@@ -33,7 +32,6 @@ var cmdsLsCmd = &cobra.Command{
 			show["after_"+evt] = s.Commands["after_"+evt]
 			printEvents(show)
 		}
-
 		return nil
-	}, storeOptions{}),
+	}, pythonConfig{}),
 }

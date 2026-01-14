@@ -2,9 +2,8 @@ import { useAuthStore } from "@/stores/auth";
 import router from "@/router";
 import type { JwtPayload } from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
-import { authMethod, baseURL, noAuth, logoutPage } from "./constants";
+import { baseURL, noAuth } from "./constants";
 import { StatusError } from "@/api/utils";
-import { setSafeTimeout } from "@/api/utils";
 
 export function parseToken(token: string) {
   // falsy or malformed jwt will throw InvalidTokenError
@@ -17,24 +16,6 @@ export function parseToken(token: string) {
   const authStore = useAuthStore();
   authStore.jwt = token;
   authStore.setUser(data.user);
-
-  // proxy auth with custom logout subject to unknown external timeout
-  if (logoutPage !== "/login" && authMethod === "proxy") {
-    console.warn("idle timeout disabled with proxy auth and custom logout");
-    return;
-  }
-
-  if (authStore.logoutTimer) {
-    clearTimeout(authStore.logoutTimer);
-  }
-
-  const expiresAt = new Date(data.exp! * 1000);
-  const timeout = expiresAt.getTime() - Date.now();
-  authStore.setLogoutTimer(
-    setSafeTimeout(() => {
-      logout("inactivity");
-    }, timeout)
-  );
 }
 
 export async function validateLogin() {
@@ -107,15 +88,11 @@ export async function signup(username: string, password: string) {
   });
 
   if (res.status !== 200) {
-    const body = await res.text();
-    throw new StatusError(
-      body || `${res.status} ${res.statusText}`,
-      res.status
-    );
+    throw new StatusError(`${res.status} ${res.statusText}`, res.status);
   }
 }
 
-export function logout(reason?: string) {
+export function logout() {
   document.cookie = "auth=; Max-Age=0; Path=/; SameSite=Strict;";
 
   const authStore = useAuthStore();
@@ -124,18 +101,7 @@ export function logout(reason?: string) {
   localStorage.setItem("jwt", "");
   if (noAuth) {
     window.location.reload();
-  } else if (logoutPage !== "/login") {
-    document.location.href = `${logoutPage}`;
   } else {
-    if (typeof reason === "string" && reason.trim() !== "") {
-      router.push({
-        path: "/login",
-        query: { "logout-reason": reason },
-      });
-    } else {
-      router.push({
-        path: "/login",
-      });
-    }
+    router.push({ path: "/login" });
   }
 }

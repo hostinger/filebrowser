@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/afero"
 
-	fberrors "github.com/filebrowser/filebrowser/v2/errors"
+	"github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/files"
 	"github.com/filebrowser/filebrowser/v2/rules"
 )
@@ -20,26 +20,24 @@ const (
 
 // User describes a user.
 type User struct {
-	ID                    uint          `storm:"id,increment" json:"id"`
-	Username              string        `storm:"unique" json:"username"`
-	Password              string        `json:"password"`
-	Scope                 string        `json:"scope"`
-	TmpDir                string        `json:"tmpDir"`
-	TrashDir              string        `json:"trashDir"`
-	QuotaFile             string        `json:"quotaFile"`
-	Locale                string        `json:"locale"`
-	LockPassword          bool          `json:"lockPassword"`
-	ViewMode              ViewMode      `json:"viewMode"`
-	SingleClick           bool          `json:"singleClick"`
-	RedirectAfterCopyMove bool          `json:"redirectAfterCopyMove"`
-	Perm                  Permissions   `json:"perm"`
-	Commands              []string      `json:"commands"`
-	Sorting               files.Sorting `json:"sorting"`
-	Fs                    afero.Fs      `json:"-" yaml:"-"`
-	Rules                 []rules.Rule  `json:"rules"`
-	HideDotfiles          bool          `json:"hideDotfiles"`
-	DateFormat            bool          `json:"dateFormat"`
-	AceEditorTheme        string        `json:"aceEditorTheme"`
+	ID           uint          `storm:"id,increment" json:"id"`
+	Username     string        `storm:"unique" json:"username"`
+	Password     string        `json:"password"`
+	Scope        string        `json:"scope"`
+	TmpDir       string        `json:"tmpDir"`
+	TrashDir     string        `json:"trashDir"`
+	QuotaFile    string        `json:"quotaFile"`
+	Locale       string        `json:"locale"`
+	LockPassword bool          `json:"lockPassword"`
+	ViewMode     ViewMode      `json:"viewMode"`
+	SingleClick  bool          `json:"singleClick"`
+	Perm         Permissions   `json:"perm"`
+	Commands     []string      `json:"commands"`
+	Sorting      files.Sorting `json:"sorting"`
+	Fs           afero.Fs      `json:"-" yaml:"-"`
+	Rules        []rules.Rule  `json:"rules"`
+	HideDotfiles bool          `json:"hideDotfiles"`
+	DateFormat   bool          `json:"dateFormat"`
 }
 
 // GetRules implements rules.Provider.
@@ -59,6 +57,8 @@ var checkableFields = []string{
 
 // Clean cleans up a user and verifies if all its fields
 // are alright to be saved.
+//
+//nolint:gocyclo
 func (u *User) Clean(baseScope string, fields ...string) error {
 	if len(fields) == 0 {
 		fields = checkableFields
@@ -68,11 +68,11 @@ func (u *User) Clean(baseScope string, fields ...string) error {
 		switch field {
 		case "Username":
 			if u.Username == "" {
-				return fberrors.ErrEmptyUsername
+				return errors.ErrEmptyUsername
 			}
 		case "Password":
 			if u.Password == "" {
-				return fberrors.ErrEmptyPassword
+				return errors.ErrEmptyPassword
 			}
 		case "ViewMode":
 			if u.ViewMode == "" {
@@ -95,7 +95,7 @@ func (u *User) Clean(baseScope string, fields ...string) error {
 
 	if u.Fs == nil {
 		scope := u.Scope
-		scope = filepath.Join(baseScope, filepath.Join("/", scope))
+		scope = filepath.Join(baseScope, filepath.Join("/", scope)) //nolint:gocritic
 		u.Fs = afero.NewBasePathFs(afero.NewOsFs(), scope)
 	}
 

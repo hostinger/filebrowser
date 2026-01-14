@@ -111,8 +111,7 @@ export default {
               return;
             }
 
-            if (this.user.redirectAfterCopyMove)
-              this.$router.push({ path: this.dest });
+            this.$router.push({ path: this.dest });
           })
           .catch((e) => {
             buttons.done("copy");

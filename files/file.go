@@ -1,8 +1,8 @@
 package files
 
 import (
-	"crypto/md5"
-	"crypto/sha1"
+	"crypto/md5"  //nolint:gosec
+	"crypto/sha1" //nolint:gosec
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
@@ -23,7 +23,7 @@ import (
 
 	"github.com/spf13/afero"
 
-	fberrors "github.com/filebrowser/filebrowser/v2/errors"
+	fbErrors "github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/rules"
 )
 
@@ -63,7 +63,6 @@ type FileOptions struct {
 	Modify     bool
 	Expand     bool
 	ReadHeader bool
-	CalcImgRes bool
 	Token      string
 	Checker    rules.Checker
 	Content    bool
@@ -94,13 +93,13 @@ func NewFileInfo(opts *FileOptions) (*FileInfo, error) {
 
 	if opts.Expand {
 		if file.IsDir {
-			if err := file.readListing(opts.Checker, opts.ReadHeader, opts.CalcImgRes); err != nil {
+			if err := file.readListing(opts.Checker, opts.ReadHeader); err != nil { //nolint:govet
 				return nil, err
 			}
 			return file, nil
 		}
 
-		err = file.detectType(opts.Modify, opts.Content, true, opts.CalcImgRes)
+		err = file.detectType(opts.Modify, opts.Content, true)
 		if err != nil {
 			return nil, err
 		}
@@ -172,7 +171,7 @@ func stat(opts *FileOptions) (*FileInfo, error) {
 // algorithm. The checksums data is saved on File object.
 func (i *FileInfo) Checksum(algo string) error {
 	if i.IsDir {
-		return fberrors.ErrIsDirectory
+		return fbErrors.ErrIsDirectory
 	}
 
 	if i.Checksums == nil {
@@ -187,6 +186,7 @@ func (i *FileInfo) Checksum(algo string) error {
 
 	var h hash.Hash
 
+	//nolint:gosec
 	switch algo {
 	case "md5":
 		h = md5.New()
@@ -197,7 +197,7 @@ func (i *FileInfo) Checksum(algo string) error {
 	case "sha512":
 		h = sha512.New()
 	default:
-		return fberrors.ErrInvalidOption
+		return fbErrors.ErrInvalidOption
 	}
 
 	_, err = io.Copy(h, reader)
@@ -222,7 +222,7 @@ func (i *FileInfo) RealPath() string {
 	return i.Path
 }
 
-func (i *FileInfo) detectType(modify, saveContent, readHeader bool, calcImgRes bool) error {
+func (i *FileInfo) detectType(modify, saveContent, readHeader bool) error {
 	if IsNamedPipe(i.Mode) {
 		i.Type = "blob"
 		return nil
@@ -253,13 +253,11 @@ func (i *FileInfo) detectType(modify, saveContent, readHeader bool, calcImgRes b
 		return nil
 	case strings.HasPrefix(mimetype, "image"):
 		i.Type = "image"
-		if calcImgRes {
-			resolution, err := calculateImageResolution(i.Fs, i.Path)
-			if err != nil {
-				log.Printf("Error calculating image resolution: %v", err)
-			} else {
-				i.Resolution = resolution
-			}
+		resolution, err := calculateImageResolution(i.Fs, i.Path)
+		if err != nil {
+			log.Printf("Error calculating image resolution: %v", err)
+		} else {
+			i.Resolution = resolution
 		}
 		return nil
 	case strings.HasSuffix(mimetype, "pdf"):
@@ -393,7 +391,7 @@ func (i *FileInfo) addSubtitle(fPath string) {
 	i.Subtitles = append(i.Subtitles, fPath)
 }
 
-func (i *FileInfo) readListing(checker rules.Checker, readHeader bool, calcImgRes bool) error {
+func (i *FileInfo) readListing(checker rules.Checker, readHeader bool) error {
 	afs := &afero.Afero{Fs: i.Fs}
 	dir, err := afs.ReadDir(i.Path)
 	if err != nil {
@@ -447,7 +445,7 @@ func (i *FileInfo) readListing(checker rules.Checker, readHeader bool, calcImgRe
 			currentDir: dir,
 		}
 
-		if !file.IsDir && strings.HasPrefix(mime.TypeByExtension(file.Extension), "image/") && calcImgRes {
+		if !file.IsDir && strings.HasPrefix(mime.TypeByExtension(file.Extension), "image/") {
 			resolution, err := calculateImageResolution(file.Fs, file.Path)
 			if err != nil {
 				log.Printf("Error calculating resolution for image %s: %v", file.Path, err)
@@ -464,7 +462,7 @@ func (i *FileInfo) readListing(checker rules.Checker, readHeader bool, calcImgRe
 			if isInvalidLink {
 				file.Type = "invalid_link"
 			} else {
-				err := file.detectType(true, false, readHeader, calcImgRes)
+				err := file.detectType(true, false, readHeader)
 				if err != nil {
 					return err
 				}

@@ -5,11 +5,10 @@
         v-if="active"
         class="action"
         @click="close"
-        :aria-label="closeButtonTitle"
-        :title="closeButtonTitle"
+        :aria-label="$t('buttons.close')"
+        :title="$t('buttons.close')"
       >
-        <i v-if="ongoing" class="material-icons">stop_circle</i>
-        <i v-else class="material-icons">arrow_back</i>
+        <i class="material-icons">arrow_back</i>
       </button>
       <i v-else class="material-icons">search</i>
       <input
@@ -22,15 +21,6 @@
         :aria-label="$t('search.search')"
         :placeholder="$t('search.search')"
       />
-      <i
-        v-show="ongoing"
-        class="material-icons spin"
-        style="display: inline-block"
-        >autorenew
-      </i>
-      <span style="margin-top: 5px" v-show="results.length > 0">
-        {{ results.length }}
-      </span>
     </div>
 
     <div id="result" ref="result">
@@ -67,6 +57,9 @@
           </li>
         </ul>
       </div>
+      <p id="renew">
+        <i class="material-icons spin">autorenew</i>
+      </p>
     </div>
   </div>
 </template>
@@ -77,11 +70,10 @@ import { useLayoutStore } from "@/stores/layout";
 
 import url from "@/utils/url";
 import { search } from "@/api";
-import { computed, inject, onMounted, ref, watch, onUnmounted } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import { StatusError } from "@/api/utils";
 
 const boxes = {
   image: { label: "images", icon: "insert_photo" },
@@ -92,7 +84,6 @@ const boxes = {
 
 const layoutStore = useLayoutStore();
 const fileStore = useFileStore();
-let searchAbortController = new AbortController();
 
 const { currentPromptName } = storeToRefs(layoutStore);
 
@@ -133,7 +124,9 @@ watch(currentPromptName, (newVal, oldVal) => {
 });
 
 watch(prompt, () => {
-  reset();
+  if (results.value.length) {
+    reset();
+  }
 });
 
 // ...mapState(useFileStore, ["isListing"]),
@@ -156,10 +149,6 @@ const filteredResults = computed(() => {
   return results.value.slice(0, resultsCount.value);
 });
 
-const closeButtonTitle = computed(() => {
-  return ongoing.value ? t("buttons.stopSearch") : t("buttons.close");
-});
-
 onMounted(() => {
   if (result.value === null) {
     return;
@@ -175,23 +164,14 @@ onMounted(() => {
   });
 });
 
-onUnmounted(() => {
-  abortLastSearch();
-});
-
 const open = () => {
   !active.value && layoutStore.showHover("search");
 };
 
 const close = (event: Event) => {
-  if (ongoing.value) {
-    abortLastSearch();
-    ongoing.value = false;
-  } else {
-    event.stopPropagation();
-    event.preventDefault();
-    layoutStore.closeHovers();
-  }
+  event.stopPropagation();
+  event.preventDefault();
+  layoutStore.closeHovers();
 };
 
 const keyup = (event: KeyboardEvent) => {
@@ -208,14 +188,9 @@ const init = (string: string) => {
 };
 
 const reset = () => {
-  abortLastSearch();
   ongoing.value = false;
   resultsCount.value = 50;
   results.value = [];
-};
-
-const abortLastSearch = () => {
-  searchAbortController.abort();
 };
 
 const submit = async (event: Event) => {
@@ -233,16 +208,8 @@ const submit = async (event: Event) => {
   ongoing.value = true;
 
   try {
-    abortLastSearch();
-    searchAbortController = new AbortController();
-    results.value = [];
-    await search(path, prompt.value, searchAbortController.signal, (item) =>
-      results.value.push(item)
-    );
+    results.value = await search(path, prompt.value);
   } catch (error: any) {
-    if (error instanceof StatusError && error.is_canceled) {
-      return;
-    }
     $showError(error);
   }
 

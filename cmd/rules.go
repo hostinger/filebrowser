@@ -69,12 +69,11 @@ func runRules(st *storage.Storage, cmd *cobra.Command, usersFn func(*users.User)
 }
 
 func getUserIdentifier(flags *pflag.FlagSet) (interface{}, error) {
-	id, err := flags.GetUint("id")
+	id, err := getUint(flags, "id")
 	if err != nil {
 		return nil, err
 	}
-
-	username, err := flags.GetString("username")
+	username, err := getString(flags, "username")
 	if err != nil {
 		return nil, err
 	}

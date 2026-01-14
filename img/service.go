@@ -19,15 +19,6 @@ import (
 // ErrUnsupportedFormat means the given image format is not supported.
 var ErrUnsupportedFormat = errors.New("unsupported image format")
 
-// ErrImageTooLarge means the image is too large to create a thumbnail.
-var ErrImageTooLarge = errors.New("image too large for thumbnail generation")
-
-// Maximum dimensions for thumbnail generation to prevent server crashes
-const (
-	MaxImageWidth  = 10000
-	MaxImageHeight = 10000
-)
-
 // Service
 type Service struct {
 	sem semaphore.Semaphore
@@ -184,7 +175,7 @@ func (s *Service) Resize(ctx context.Context, in io.Reader, width, height int, o
 	case ResizeModeFill:
 		img = imaging.Fill(img, width, height, imaging.Center, config.quality.resampleFilter())
 	case ResizeModeFit:
-		fallthrough
+		fallthrough //nolint:gocritic
 	default:
 		img = imaging.Fit(img, width, height, config.quality.resampleFilter())
 	}
@@ -196,15 +187,9 @@ func (s *Service) detectFormat(in io.Reader) (Format, io.Reader, error) {
 	buf := &bytes.Buffer{}
 	r := io.TeeReader(in, buf)
 
-	imgConfig, imgFormat, err := image.DecodeConfig(r)
+	_, imgFormat, err := image.DecodeConfig(r)
 	if err != nil {
 		return 0, nil, fmt.Errorf("%s: %w", err.Error(), ErrUnsupportedFormat)
-	}
-
-	// Check if image dimensions exceed maximum allowed size
-	if imgConfig.Width > MaxImageWidth || imgConfig.Height > MaxImageHeight {
-		return 0, nil, fmt.Errorf("image dimensions %dx%d exceed maximum %dx%d: %w",
-			imgConfig.Width, imgConfig.Height, MaxImageWidth, MaxImageHeight, ErrImageTooLarge)
 	}
 
 	format, err := ParseFormat(imgFormat)

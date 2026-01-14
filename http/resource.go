@@ -1,4 +1,4 @@
-package fbhttp
+package http
 
 import (
 	"context"
@@ -16,10 +16,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/spf13/afero"
 
-	fberrors "github.com/filebrowser/filebrowser/v2/errors"
+	fbErrors "github.com/filebrowser/filebrowser/v2/errors"
 	"github.com/filebrowser/filebrowser/v2/files"
 	"github.com/filebrowser/filebrowser/v2/fileutils"
 	"github.com/filebrowser/filebrowser/v2/hostinger"
@@ -61,7 +61,7 @@ var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 	}
 
 	if file.IsSymlink && symlinkOutOfScope(d, file) {
-		return errToStatus(fberrors.ErrNotExist), fberrors.ErrNotExist
+		return errToStatus(fbErrors.ErrNotExist), fbErrors.ErrNotExist
 	}
 
 	if r.URL.Query().Get("disk_usage") == hostinger.QueryTrue {
@@ -76,9 +76,9 @@ var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 	}
 
 	if file.IsDir {
-		file.Sorting = d.user.Sorting
-		file.ApplySort()
-		file.FilterItems(func(fi *files.FileInfo) bool {
+		file.Listing.Sorting = d.user.Sorting
+		file.Listing.ApplySort()
+		file.Listing.FilterItems(func(fi *files.FileInfo) bool {
 			// remove files that should be hidden
 			_, exists := d.server.HiddenFiles[fi.Name]
 			if exists {
@@ -111,7 +111,7 @@ var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 
 	if checksum := r.URL.Query().Get("checksum"); checksum != "" {
 		err := file.Checksum(checksum)
-		if errors.Is(err, fberrors.ErrInvalidOption) {
+		if errors.Is(err, fbErrors.ErrInvalidOption) {
 			return http.StatusBadRequest, nil
 		} else if err != nil {
 			return http.StatusInternalServerError, err
@@ -286,15 +286,15 @@ var resourcePutHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 
 func checkSrcDstAccess(src, dst string, d *data) error {
 	if !d.Check(src) || !d.Check(dst) {
-		return fberrors.ErrPermissionDenied
+		return fbErrors.ErrPermissionDenied
 	}
 
 	if dst == "/" || src == "/" {
-		return fberrors.ErrPermissionDenied
+		return fbErrors.ErrPermissionDenied
 	}
 
 	if err := checkParent(src, dst); err != nil {
-		return fberrors.ErrInvalidRequestParams
+		return fbErrors.ErrInvalidRequestParams
 	}
 
 	return nil
@@ -342,7 +342,7 @@ func resourcePatchHandler(fileCache FileCache) handleFunc {
 		err = d.RunHook(func() error {
 			if unarchive {
 				if !d.user.Perm.Create {
-					return fberrors.ErrPermissionDenied
+					return fbErrors.ErrPermissionDenied
 				}
 
 				return hostinger.Unarchive(r.Context(), src, dst, d.user.Fs, override)
@@ -362,7 +362,7 @@ func checkParent(src, dst string) error {
 
 	rel = filepath.ToSlash(rel)
 	if !strings.HasPrefix(rel, "../") && rel != ".." && rel != "." {
-		return fberrors.ErrSourceIsParent
+		return fbErrors.ErrSourceIsParent
 	}
 
 	return nil
@@ -424,12 +424,6 @@ func writeFile(afs afero.Fs, dst string, in io.Reader, fileMode, dirMode fs.File
 		return nil, err
 	}
 
-	// Sync the file to ensure all data is written to storage.
-	// to prevent file corruption.
-	if err := file.Sync(); err != nil {
-		return nil, err
-	}
-
 	// Gets the info about the file.
 	info, err := file.Stat()
 	if err != nil {
@@ -454,13 +448,13 @@ func patchAction(ctx context.Context, action, src, dst string, d *data, fileCach
 	switch action {
 	case "copy":
 		if !d.user.Perm.Create {
-			return fberrors.ErrPermissionDenied
+			return fbErrors.ErrPermissionDenied
 		}
 
 		return fileutils.CopyScoped(d.user.Fs, src, dst, d.settings.FileMode, d.settings.DirMode, d.server.Root)
 	case "rename":
 		if !d.user.Perm.Rename {
-			return fberrors.ErrPermissionDenied
+			return fbErrors.ErrPermissionDenied
 		}
 		src = path.Clean("/" + src)
 		dst = path.Clean("/" + dst)
@@ -485,7 +479,7 @@ func patchAction(ctx context.Context, action, src, dst string, d *data, fileCach
 
 		return fileutils.MoveFile(d.user.Fs, src, dst, d.settings.FileMode, d.settings.DirMode)
 	default:
-		return fmt.Errorf("unsupported action %s: %w", action, fberrors.ErrInvalidRequestParams)
+		return fmt.Errorf("unsupported action %s: %w", action, fbErrors.ErrInvalidRequestParams)
 	}
 }
 
@@ -544,12 +538,12 @@ func archiveHandler(r *http.Request, d *data) error {
 
 	archive, err := hostinger.GetFilenameFromQuery(r, dir)
 	if err != nil {
-		return fberrors.ErrInvalidRequestParams
+		return fbErrors.ErrInvalidRequestParams
 	}
 
 	filenames, err := parseQueryFiles(r, dir, d.user)
 	if err != nil {
-		return fberrors.ErrInvalidRequestParams
+		return fbErrors.ErrInvalidRequestParams
 	}
 
 	return hostinger.Archive(r.Context(), d.user.Fs, archive, algo, filenames)
@@ -562,16 +556,16 @@ func chmodActionHandler(r *http.Request, d *data) error {
 	recursionType := r.URL.Query().Get("type")
 
 	if !d.user.Perm.Modify {
-		return fberrors.ErrPermissionDenied
+		return fbErrors.ErrPermissionDenied
 	}
 
 	if !d.Check(target) || target == "/" {
-		return fberrors.ErrPermissionDenied
+		return fbErrors.ErrPermissionDenied
 	}
 
 	mode, err := strconv.ParseUint(perms, 10, 32)
 	if err != nil {
-		return fberrors.ErrInvalidRequestParams
+		return fbErrors.ErrInvalidRequestParams
 	}
 
 	permMode := normalizeFileMode(mode)

@@ -600,6 +600,7 @@ var types = map[string]string{
 	".epub":      "application/epub+zip",
 }
 
+//nolint:gochecknoinits
 func init() {
 	for ext, typ := range types {
 		// skip errors

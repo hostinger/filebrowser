@@ -11,7 +11,6 @@ import (
 )
 
 const DefaultUsersHomeBasePath = "/users"
-const DefaultLogoutPage = "/login"
 const DefaultMinimumPasswordLength = 6
 const DefaultFileMode = 0644
 const DefaultDirMode = 0755
@@ -23,12 +22,10 @@ type AuthMethod string
 type Settings struct {
 	Key                   []byte              `json:"key"`
 	Signup                bool                `json:"signup"`
-	HideLoginButton       bool                `json:"hideLoginButton"`
 	CreateUserDir         bool                `json:"createUserDir"`
 	UserHomeBasePath      string              `json:"userHomeBasePath"`
 	Defaults              UserDefaults        `json:"defaults"`
 	AuthMethod            AuthMethod          `json:"authMethod"`
-	LogoutPage            string              `json:"logoutPage"`
 	Branding              Branding            `json:"branding"`
 	Tus                   Tus                 `json:"tus"`
 	Commands              map[string][]string `json:"commands"`
@@ -37,8 +34,7 @@ type Settings struct {
 	MinimumPasswordLength uint                `json:"minimumPasswordLength"`
 	FileMode              fs.FileMode         `json:"fileMode"`
 	DirMode               fs.FileMode         `json:"dirMode"`
-	HideDotfiles          bool                `json:"hideDotfiles"`
-	AuthLogoutURL         string              `json:"authLogoutUrl"` // Hostinger specific
+	AuthLogoutURL         string              `json:"authLogoutUrl"`
 }
 
 // GetRules implements rules.Provider.
@@ -60,10 +56,9 @@ type Server struct {
 	ResizePreview         bool                `json:"resizePreview"`
 	EnableExec            bool                `json:"enableExec"`
 	TypeDetectionByHeader bool                `json:"typeDetectionByHeader"`
-	ImageResolutionCal    bool                `json:"imageResolutionCalculation"`
 	AuthHook              string              `json:"authHook"`
+	HiddenFiles           map[string]struct{} `json:"hiddenFiles"`
 	TokenExpirationTime   string              `json:"tokenExpirationTime"`
-	HiddenFiles           map[string]struct{} `json:"hiddenFiles"` // Hostinger specific
 }
 
 // Clean cleans any variables that might need cleaning.

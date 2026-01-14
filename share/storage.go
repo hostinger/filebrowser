@@ -3,7 +3,7 @@ package share
 import (
 	"time"
 
-	fberrors "github.com/filebrowser/filebrowser/v2/errors"
+	"github.com/filebrowser/filebrowser/v2/errors"
 )
 
 // StorageBackend is the interface to implement for a share storage.
@@ -79,7 +79,7 @@ func (s *Storage) GetByHash(hash string) (*Link, error) {
 		if err := s.Delete(link.Hash); err != nil {
 			return nil, err
 		}
-		return nil, fberrors.ErrNotExist
+		return nil, errors.ErrNotExist
 	}
 
 	return link, nil

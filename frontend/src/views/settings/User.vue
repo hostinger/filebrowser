@@ -15,19 +15,6 @@
             :isDefault="false"
             :isNew="isNew"
           />
-
-          <p v-if="isCurrentPasswordRequired">
-            <label for="currentPassword">{{
-              t("settings.currentPassword")
-            }}</label>
-            <input
-              class="input input--block"
-              type="password"
-              v-model="currentPassword"
-              id="currentPassword"
-              autocomplete="current-password"
-            />
-          </p>
         </div>
 
         <div class="card-action">
@@ -76,8 +63,6 @@ const error = ref<StatusError>();
 const originalUser = ref<IUser>();
 const user = ref<IUser>();
 const createUserDir = ref<boolean>(false);
-const currentPassword = ref<string>("");
-const isCurrentPasswordRequired = ref<boolean>(false);
 
 const $showError = inject<IToastError>("$showError")!;
 const $showSuccess = inject<IToastSuccess>("$showSuccess")!;
@@ -105,12 +90,7 @@ const fetchData = async () => {
 
   try {
     if (isNew.value) {
-      const {
-        authMethod,
-        defaults,
-        createUserDir: _createUserDir,
-      } = await settings.get();
-      isCurrentPasswordRequired.value = authMethod == "json";
+      const { defaults, createUserDir: _createUserDir } = await settings.get();
       createUserDir.value = _createUserDir;
       user.value = {
         ...defaults,
@@ -121,8 +101,6 @@ const fetchData = async () => {
         id: 0,
       };
     } else {
-      const { authMethod } = await settings.get();
-      isCurrentPasswordRequired.value = authMethod == "json";
       const id = Array.isArray(route.params.id)
         ? route.params.id.join("")
         : route.params.id;
@@ -173,11 +151,11 @@ const save = async (event: Event) => {
         ...user.value,
       };
 
-      const loc = await api.create(newUser, currentPassword.value);
+      const loc = await api.create(newUser);
       router.push({ path: loc || "/settings/users" });
       $showSuccess(t("settings.userCreated"));
     } else {
-      await api.update(user.value, ["all"], currentPassword.value);
+      await api.update(user.value);
 
       if (user.value.id === authStore.user?.id) {
         authStore.updateUser(user.value);
