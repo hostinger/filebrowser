@@ -14,6 +14,7 @@ const quotaExists: boolean = window.FileBrowser.QuotaExists;
 const noAuth: boolean = window.FileBrowser.NoAuth;
 const authMethod = window.FileBrowser.AuthMethod;
 const authLogoutURL: string = window.FileBrowser.AuthLogoutURL;
+const logoutPage: string = window.FileBrowser.LogoutPage;
 const loginPage: boolean = window.FileBrowser.LoginPage;
 const theme: UserTheme = window.FileBrowser.Theme;
 const enableThumbs: boolean = window.FileBrowser.EnableThumbs;
@@ -22,6 +23,7 @@ const enableExec: boolean = window.FileBrowser.EnableExec;
 const tusSettings = window.FileBrowser.TusSettings;
 const origin = window.location.origin;
 const tusEndpoint = `/api/tus`;
+const hideLoginButton = window.FileBrowser.HideLoginButton;
 
 export {
   name,
@@ -39,6 +41,7 @@ export {
   noAuth,
   authMethod,
   authLogoutURL,
+  logoutPage,
   loginPage,
   theme,
   enableThumbs,
@@ -47,4 +50,5 @@ export {
   tusSettings,
   origin,
   tusEndpoint,
+  hideLoginButton,
 };

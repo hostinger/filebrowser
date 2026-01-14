@@ -1,5 +1,5 @@
 <template>
-  <div id="editor-container" @wheel.prevent.stop>
+  <div id="editor-container">
     <header-bar>
       <action icon="close" :label="t('buttons.close')" @action="close()" />
       <title>{{ fileStore.req?.name ?? "" }}</title>
@@ -69,7 +69,7 @@ import HeaderBar from "@/components/header/HeaderBar.vue";
 import { useAuthStore } from "@/stores/auth";
 import { useFileStore } from "@/stores/file";
 import { useLayoutStore } from "@/stores/layout";
-import { getTheme } from "@/utils/theme";
+import { getEditorTheme } from "@/utils/theme";
 import { marked } from "marked";
 import { inject, onBeforeUnmount, onMounted, ref, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
@@ -97,7 +97,6 @@ const isMarkdownFile =
 
 onMounted(() => {
   window.addEventListener("keydown", keyEvent);
-  window.addEventListener("wheel", handleScroll);
   window.addEventListener("beforeunload", handlePageChange);
 
   const fileContent = fileStore.req?.content || "";
@@ -111,13 +110,6 @@ onMounted(() => {
         console.error("Failed to convert content to HTML:", error);
         previewContent.value = "";
       }
-
-      const previewContainer = document.getElementById("preview-container");
-      if (previewContainer) {
-        previewContainer.addEventListener("wheel", handleScroll, {
-          capture: true,
-        });
-      }
     }
   });
 
@@ -130,7 +122,7 @@ onMounted(() => {
     value: fileContent,
     showPrintMargin: false,
     readOnly: fileStore.req?.type === "textImmutable",
-    theme: "ace/theme/chrome",
+    theme: getEditorTheme(authStore.user?.aceEditorTheme ?? ""),
     mode: modelist.getModeForPath(fileStore.req!.name).mode,
     wrap: true,
     enableBasicAutocompletion: true,
@@ -138,17 +130,12 @@ onMounted(() => {
     enableSnippets: true,
   });
 
-  if (getTheme() === "dark") {
-    editor.value!.setTheme("ace/theme/twilight");
-  }
-
   editor.value.setFontSize(fontSize.value);
   editor.value.focus();
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", keyEvent);
-  window.removeEventListener("wheel", handleScroll);
   window.removeEventListener("beforeunload", handlePageChange);
   editor.value?.destroy();
 });
@@ -164,6 +151,10 @@ onBeforeRouteUpdate((to, from, next) => {
     prompt: "discardEditorChanges",
     confirm: (event: Event) => {
       event.preventDefault();
+      next();
+    },
+    saveAction: async () => {
+      await save();
       next();
     },
   });
@@ -186,13 +177,6 @@ const keyEvent = (event: KeyboardEvent) => {
   save();
 };
 
-const handleScroll = (event: WheelEvent) => {
-  const editorContainer = document.getElementById("preview-container");
-  if (editorContainer) {
-    editorContainer.scrollTop += event.deltaY;
-  }
-};
-
 const handlePageChange = (event: BeforeUnloadEvent) => {
   if (!editor.value?.session.getUndoManager().isClean()) {
     event.preventDefault();
@@ -202,7 +186,7 @@ const handlePageChange = (event: BeforeUnloadEvent) => {
   }
 };
 
-const save = async () => {
+const save = async (throwError?: boolean) => {
   const button = "save";
   buttons.loading("save");
 
@@ -213,6 +197,7 @@ const save = async () => {
   } catch (e: any) {
     buttons.done(button);
     $showError(e);
+    if (throwError) throw e;
   }
 };
 
@@ -231,6 +216,27 @@ const decreaseFontSize = () => {
 };
 
 const close = () => {
+  if (!editor.value?.session.getUndoManager().isClean()) {
+    layoutStore.showHover({
+      prompt: "discardEditorChanges",
+      confirm: (event: Event) => {
+        event.preventDefault();
+        finishClose();
+      },
+      saveAction: async () => {
+        try {
+          await save(true);
+          finishClose();
+        } catch {}
+      },
+    });
+    return;
+  }
+  finishClose();
+};
+
+const finishClose = () => {
+  fileStore.updateRequest(null);
   const uri = url.removeLastDir(route.path) + "/";
   router.push({ path: uri });
 };

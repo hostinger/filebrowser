@@ -46,7 +46,12 @@
     "update": "Atualizar",
     "upload": "Enviar",
     "openFile": "Open file",
-    "discardChanges": "Discard"
+    "discardChanges": "Discard",
+    "stopSearch": "Stop searching",
+    "saveChanges": "Save changes",
+    "editAsText": "Edit as Text",
+    "increaseFontSize": "Increase font size",
+    "decreaseFontSize": "Decrease font size"
   },
   "download": {
     "downloadFile": "Descarregar ficheiro",
@@ -79,7 +84,16 @@
     "sortByLastModified": "Ordenar pela última alteração",
     "sortByName": "Ordenar pelo nome",
     "sortBySize": "Ordenar pelo tamanho",
-    "noPreview": "Preview is not available for this file."
+    "noPreview": "Preview is not available for this file.",
+    "csvTooLarge": "CSV file is too large for preview (>5MB). Please download to view.",
+    "csvLoadFailed": "Failed to load CSV file.",
+    "showingRows": "Showing {count} row(s)",
+    "columnSeparator": "Column Separator",
+    "csvSeparators": {
+      "comma": "Comma (,)",
+      "semicolon": "Semicolon (;)",
+      "both": "Both (,) and (;)"
+    }
   },
   "help": {
     "click": "selecionar pasta ou ficheiro",
@@ -105,7 +119,11 @@
     "submit": "Entrar",
     "username": "Nome de utilizador",
     "usernameTaken": "O nome de utilizador já está registado",
-    "wrongCredentials": "Dados errados"
+    "wrongCredentials": "Dados errados",
+    "passwordTooShort": "Password must be at least {min} characters",
+    "logout_reasons": {
+      "inactivity": "You have been logged out due to inactivity."
+    }
   },
   "permanent": "Permanente",
   "prompts": {
@@ -172,6 +190,7 @@
     "video": "Vídeos"
   },
   "settings": {
+    "aceEditorTheme": "Ace editor theme",
     "admin": "Admin",
     "administrator": "Administrador",
     "allowCommands": "Executar comandos",
@@ -180,9 +199,10 @@
     "allowPublish": "Publicar novas páginas e conteúdos",
     "allowSignup": "Permitir que os utilizadores criem contas",
     "avoidChanges": "(deixe em branco para evitar alterações)",
-    "branding": "Branding",
-    "brandingDirectoryPath": "Caminho da pasta branding",
-    "brandingHelp": "Pode personalizar a aparência do seu Navegador de Ficheiros, alterar o nome, substituindo o logotipo adicionando estilos personalizados e mesmo desativando links externos para o GitHub.\nPara mais informações sobre branding personalizado, por favor verifique {0}.",
+    "hideLoginButton": "Hide the login button from public pages",
+    "branding": "Marca",
+    "brandingDirectoryPath": "Caminho da pasta de marca",
+    "brandingHelp": "Pode personalizar a aparência do seu Navegador de Ficheiros, alterar o nome, substituindo o logótipo, adicionando estilos personalizados e mesmo desativando links externos para o GitHub.\nPara mais informações sobre marca personalizada, por favor veja {0}.",
     "changePassword": "Alterar palavra-passe",
     "commandRunner": "Execução de comandos",
     "commandRunnerHelp": "Aqui pode definir comandos que são executados nos eventos nomeados. Tem de escrever um por linha. As variáveis de ambiente {0} e {1} estarão disponíveis, sendo {0} relativo a {1}. Para mais informações sobre esta funcionalidade e as variáveis de ambiente, por favor verifique {2}.",
@@ -256,7 +276,8 @@
     "userManagement": "Gestão de utilizadores",
     "username": "Nome de utilizador",
     "users": "Utilizadores",
-    "userUpdated": "Utilizador atualizado!"
+    "userUpdated": "Utilizador atualizado!",
+    "currentPassword": "Your Current Password"
   },
   "sidebar": {
     "help": "Ajuda",

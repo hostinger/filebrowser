@@ -1,4 +1,4 @@
-package http
+package fbhttp
 
 import (
 	"errors"
@@ -33,7 +33,7 @@ func parseQueryFiles(r *http.Request, f *files.FileInfo, _ *users.User) ([]strin
 		fileSlice = append(fileSlice, f.Path)
 	} else {
 		for _, name := range names {
-			name, err := url.QueryUnescape(strings.Replace(name, "+", "%2B", -1)) //nolint:govet
+			name, err := url.QueryUnescape(strings.ReplaceAll(name, "+", "%2B"))
 			if err != nil {
 				return nil, err
 			}
@@ -124,6 +124,7 @@ func getFiles(d *data, path, commonPath string) ([]archives.FileInfo, error) {
 	if path != commonPath {
 		nameInArchive := strings.TrimPrefix(path, commonPath)
 		nameInArchive = strings.TrimPrefix(nameInArchive, string(filepath.Separator))
+		nameInArchive = filepath.ToSlash(nameInArchive)
 
 		archiveFiles = append(archiveFiles, archives.FileInfo{
 			FileInfo:      info,
