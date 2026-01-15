@@ -161,6 +161,7 @@ import {
   tmpDir,
   trashDir,
   quotaExists,
+  authMethod,
   authLogoutURL,
 } from "@/utils/constants";
 import { files as api } from "@/api";
@@ -196,6 +197,7 @@ export default {
     tmpDir: () => tmpDir,
     trashDir: () => trashDir,
     quotaExists: () => quotaExists,
+    authMethod: () => authMethod,
     authLogoutURL: () => authLogoutURL,
   },
   asyncComputed: {

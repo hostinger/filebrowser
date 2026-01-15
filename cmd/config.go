@@ -56,8 +56,8 @@ func addConfigFlags(flags *pflag.FlagSet) {
 	flags.String("branding.theme", "", "set the theme")
 	flags.String("branding.color", "", "set the theme color")
 	flags.String("branding.files", "", "path to directory with images and custom styles")
-	flags.Bool("branding.disableExternal", false, "disable external links such as GitHub links")
-	flags.Bool("branding.disableUsedPercentage", false, "disable used disk percentage graph")
+	flags.Bool("branding.disableExternal", true, "disable external links such as GitHub links")
+	flags.Bool("branding.disableUsedPercentage", true, "disable used disk percentage graph")
 
 	flags.Uint64("tus.chunkSize", settings.DefaultTusChunkSize, "the tus chunk size")
 	flags.Uint16("tus.retryCount", settings.DefaultTusRetryCount, "the tus retry count")
