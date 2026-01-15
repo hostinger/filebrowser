@@ -124,27 +124,24 @@ export async function signup(username: string, password: string) {
 export function logout(reason?: string) {
   document.cookie = "auth=; Max-Age=0; Path=/; SameSite=Strict;";
 
-  const authStore = useAuthStore();
-  authStore.clearUser();
-
-  localStorage.setItem("jwt", "");
-  if (noAuth) {
-    window.location.reload();
-  } else if (authMethod === "proxy" && authLogoutURL !== "") {
+  if (authMethod === "proxy" && authLogoutURL !== "") {
     // Hostinger specific
     fetch(authLogoutURL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-    })
-    .catch(() => {
+    }).catch(() => {
       console.error("Failed to logout using proxy auth");
     });
+  }
 
-    router.push({
-      path: "/login",
-    });
+  const authStore = useAuthStore();
+  authStore.clearUser();
+
+  localStorage.setItem("jwt", "");
+  if (noAuth) {
+    window.location.reload();
   } else if (logoutPage !== "/login") {
     document.location.href = `${logoutPage}`;
   } else {
