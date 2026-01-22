@@ -83,7 +83,7 @@ func TestArchive(t *testing.T) {
 	archivePath := "/out/archive"
 	filenames := []string{"/data/a.txt", "/data/b.txt"}
 
-	if err := Archive(context.Background(), fs, archivePath, "zip", filenames); err != nil {
+	if err := Archive(context.Background(), fs, archivePath, "zip", filenames, 0755); err != nil {
 		t.Fatalf("Archive failed: %v", err)
 	}
 
@@ -109,12 +109,12 @@ func TestUnarchive(t *testing.T) {
 
 	archivePath := "/archive"
 	filenames := []string{"/data/a.txt", "/data/b.txt", "/data/subdir"}
-	if err := Archive(context.Background(), fs, archivePath, "zip", filenames); err != nil {
+	if err := Archive(context.Background(), fs, archivePath, "zip", filenames, 0755); err != nil {
 		t.Fatalf("Archive failed: %v", err)
 	}
 
 	destDir := "/extracted"
-	if err := Unarchive(context.Background(), archivePath+".zip", destDir, fs, true); err != nil {
+	if err := Unarchive(context.Background(), archivePath+".zip", destDir, fs, true, 0755); err != nil {
 		t.Fatalf("Unarchive failed: %v", err)
 	}
 

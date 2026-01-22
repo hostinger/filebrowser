@@ -37,7 +37,7 @@ func AlgoToExtension(algo string) (string, error) {
 	}
 }
 
-func Unarchive(ctx context.Context, src, dst string, afs afero.Fs, overwrite bool) error {
+func Unarchive(ctx context.Context, src, dst string, afs afero.Fs, overwrite bool, dirMode fs.FileMode) error {
 	reader, err := afs.Open(src)
 	if err != nil {
 		return fmt.Errorf("archive open: %w", err)
@@ -61,7 +61,7 @@ func Unarchive(ctx context.Context, src, dst string, afs afero.Fs, overwrite boo
 			return fbErrors.ErrExist
 		}
 
-		if err := afs.MkdirAll(filepath.Dir(fullpath), fs.ModeDir); err != nil {
+		if err := afs.MkdirAll(filepath.Dir(fullpath), dirMode); err != nil {
 			return fmt.Errorf("extract mkdir: %w", err)
 		}
 
@@ -98,7 +98,7 @@ func Unarchive(ctx context.Context, src, dst string, afs afero.Fs, overwrite boo
 	return fbErrors.ErrInvalidDataType
 }
 
-func Archive(ctx context.Context, afs afero.Fs, archive, algo string, filenames []string) error {
+func Archive(ctx context.Context, afs afero.Fs, archive, algo string, filenames []string, dirMode fs.FileMode) error {
 	extension, err := AlgoToExtension(algo)
 	if err != nil {
 		return fbErrors.ErrInvalidRequestParams
@@ -120,8 +120,7 @@ func Archive(ctx context.Context, afs afero.Fs, archive, algo string, filenames 
 		return fbErrors.ErrExist
 	}
 
-	err = afs.MkdirAll(filepath.Dir(archive), fs.ModeDir)
-	if err != nil {
+	if err := afs.MkdirAll(filepath.Dir(archive), dirMode); err != nil {
 		return err
 	}
 
