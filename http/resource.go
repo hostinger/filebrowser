@@ -345,7 +345,7 @@ func resourcePatchHandler(fileCache FileCache) handleFunc {
 					return fberrors.ErrPermissionDenied
 				}
 
-				return hostinger.Unarchive(r.Context(), src, dst, d.user.Fs, override)
+				return hostinger.Unarchive(r.Context(), src, dst, d.user.Fs, override, d.settings.DirMode)
 			}
 			return patchAction(r.Context(), action, src, dst, d, fileCache)
 		}, action, src, dst, d.user)
@@ -552,7 +552,7 @@ func archiveHandler(r *http.Request, d *data) error {
 		return fberrors.ErrInvalidRequestParams
 	}
 
-	return hostinger.Archive(r.Context(), d.user.Fs, archive, algo, filenames)
+	return hostinger.Archive(r.Context(), d.user.Fs, archive, algo, filenames, d.settings.DirMode)
 }
 
 func chmodActionHandler(r *http.Request, d *data) error {
