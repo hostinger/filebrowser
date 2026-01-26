@@ -293,6 +293,13 @@
             show="share"
           />
           <action
+            v-if="editAvailable"
+            id="edit-button"
+            icon="mode_edit"
+            :label="t('buttons.edit')"
+            @action="openSelectedFile"
+          />
+          <action
             v-if="headerButtons.rename"
             icon="mode_edit"
             :label="t('buttons.rename')"
@@ -413,7 +420,7 @@ import {
   toRef,
   watch,
 } from "vue";
-import { useRoute, onBeforeRouteUpdate } from "vue-router";
+import { useRoute, useRouter, onBeforeRouteUpdate } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { removePrefix } from "@/api/utils";
 
@@ -438,6 +445,7 @@ const route = useRoute();
 onBeforeRouteUpdate(() => {
   hideContextMenu();
 });
+const router = useRouter();
 
 const { t } = useI18n();
 
@@ -1161,6 +1169,24 @@ const handleEmptyAreaClick = (e: MouseEvent) => {
   if (target.closest(".context-menu")) return;
 
   fileStore.selected = [];
+};
+
+const editAvailable = computed((): boolean => {
+  return (
+    fileStore.selectedCount === 1 &&
+    fileStore.req !== null &&
+    !fileStore.req.items[fileStore.selected[0]].isDir
+  );
+});
+
+const openSelectedFile = () => {
+  if (
+    fileStore.selectedCount === 1 &&
+    fileStore.req !== null &&
+    !fileStore.req.items[fileStore.selected[0]].isDir
+  ) {
+    router.push({ path: fileStore.req.items[fileStore.selected[0]].url });
+  }
 };
 </script>
 <style scoped>

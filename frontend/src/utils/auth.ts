@@ -9,7 +9,7 @@ import {
   logoutPage,
   authLogoutURL,
 } from "./constants";
-import { StatusError } from "@/api/utils";
+import { fetchURL, StatusError } from "@/api/utils";
 import { setSafeTimeout } from "@/api/utils";
 
 export function parseToken(token: string) {
@@ -122,19 +122,14 @@ export async function signup(username: string, password: string) {
 }
 
 export function logout(reason?: string) {
-  document.cookie = "auth=; Max-Age=0; Path=/; SameSite=Strict;";
-
   if (authMethod === "proxy" && authLogoutURL !== "") {
     // Hostinger specific
-    fetch(authLogoutURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).catch(() => {
+    fetchURL(authLogoutURL, { method: "POST" }).catch(() => {
       console.error("Failed to logout using proxy auth");
     });
   }
+
+  document.cookie = "auth=; Max-Age=0; Path=/; SameSite=Strict;";
 
   const authStore = useAuthStore();
   authStore.clearUser();
