@@ -54,8 +54,8 @@ async function resourceAction(url: string, method: ApiMethod, content?: any) {
   return res;
 }
 
-export async function remove(url: string, skipTrash = true) {
-  return resourceAction(`${url}?skip_trash=${skipTrash}`, "DELETE");
+export async function remove(url: string, skipTrash: boolean = true) {
+  return resourceAction(`${url}?skip_trash=${skipTrash.toString()}`, "DELETE");
 }
 
 export async function put(url: string, content = "") {
