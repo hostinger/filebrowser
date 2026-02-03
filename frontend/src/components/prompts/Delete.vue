@@ -108,7 +108,7 @@ export default {
 
         const promises = [];
         for (const index of this.selected) {
-          promises.push(api.remove(this.req.items[index].url));
+          promises.push(api.remove(this.req.items[index].url, this.skipTrash));
         }
 
         await Promise.all(promises);
