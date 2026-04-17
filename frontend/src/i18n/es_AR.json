@@ -39,7 +39,6 @@
     "replace": "Reemplazar",
     "reportIssue": "Reportar problema",
     "save": "Guardar",
-    "saveChanges": "Save changes",
     "schedule": "Programar",
     "search": "Buscar",
     "select": "Seleccionar",
@@ -52,7 +51,13 @@
     "toggleSidebar": "Mostrar/Ocultar menú",
     "unarchive": "Desarchivar",
     "update": "Actualizar",
-    "upload": "Subir"
+    "upload": "Subir",
+    "openDirect": "View raw",
+    "saveChanges": "Guardar cambios",
+    "overrideAll": "Replace all files in destination folder",
+    "skipAll": "Skip all conflicting files",
+    "renameAll": "Rename all files (create a copy)",
+    "singleDecision": "Decide for each conflicting file"
   },
   "download": {
     "downloadFile": "Descargar fichero",
@@ -96,7 +101,8 @@
     "size": "Tamaño",
     "sortByLastModified": "Ordenar por última modificación",
     "sortByName": "Ordenar por nombre",
-    "sortBySize": "Ordenar por tamaño"
+    "sortBySize": "Ordenar por tamaño",
+    "fileEncoding": "File Encoding"
   },
   "help": {
     "click": "seleccionar archivo o carpeta",
@@ -190,7 +196,19 @@
     "uploadFiles": "Cargando {files} archivos...",
     "uploadFolder": "Carpeta",
     "uploadMessage": "Seleccione una opción para cargar.",
-    "write": "Escribe"
+    "write": "Escribe",
+    "replaceOrSkip": "Replace or skip files",
+    "resolveConflict": "Which files do you want to keep?",
+    "singleConflictResolve": "If you select both versions, a number will be added to the name of the copied file.",
+    "fastConflictResolve": "The destination folder there are {count} files with same name.",
+    "uploadingFiles": "Uploading files",
+    "filesInOrigin": "Files in origin",
+    "filesInDest": "Files in destination",
+    "override": "Overwrite",
+    "skip": "Skip",
+    "forbiddenError": "Forbidden Error",
+    "currentPassword": "Your password",
+    "currentPasswordMessage": "Enter your password to validate this action."
   },
   "search": {
     "images": "Images",

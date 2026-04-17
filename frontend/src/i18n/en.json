@@ -42,6 +42,7 @@
     "update": "Update",
     "upload": "Upload",
     "openFile": "Open file",
+    "openDirect": "View raw",
     "discardChanges": "Discard",
     "stopSearch": "Stop searching",
     "saveChanges": "Save changes",
@@ -52,7 +53,11 @@
     "directorySizes": "Calculate directory sizes",
     "edit": "Edit",
     "permissions": "Permissions",
-    "unarchive": "Extract"
+    "unarchive": "Extract",
+    "overrideAll": "Replace all files in destination folder",
+    "skipAll": "Skip all conflicting files",
+    "renameAll": "Rename all files (create a copy)",
+    "singleDecision": "Decide for each conflicting file"
   },
   "download": {
     "downloadFile": "Download File",
@@ -99,7 +104,8 @@
       "comma": "Comma (,)",
       "semicolon": "Semicolon (;)",
       "both": "Both (,) and (;)"
-    }
+    },
+    "fileEncoding": "File Encoding"
   },
   "help": {
     "click": "select file or directory",
@@ -193,7 +199,19 @@
     "unsavedChanges": "Changes that you made may not be saved. Leave page?",
     "uploadFile": "File",
     "uploadFolder": "Folder",
-    "write": "Write"
+    "write": "Write",
+    "replaceOrSkip": "Replace or skip files",
+    "resolveConflict": "Which files do you want to keep?",
+    "singleConflictResolve": "If you select both versions, a number will be added to the name of the copied file.",
+    "fastConflictResolve": "The destination folder there are {count} files with same name.",
+    "uploadingFiles": "Uploading files",
+    "filesInOrigin": "Files in origin",
+    "filesInDest": "Files in destination",
+    "override": "Overwrite",
+    "skip": "Skip",
+    "forbiddenError": "Forbidden Error",
+    "currentPassword": "Your password",
+    "currentPasswordMessage": "Enter your password to validate this action."
   },
   "search": {
     "images": "Images",
@@ -261,7 +279,7 @@
       "execute": "Execute commands",
       "modify": "Edit files",
       "rename": "Rename or move files and directories",
-      "share": "Share files"
+      "share": "Share files (require download permission)"
     },
     "permissions": "Permissions",
     "permissionsHelp": "You can set the user to be an administrator or choose the permissions individually. If you select \"Administrator\", all of the other options will be automatically checked. The management of users remains a privilege of an administrator.\n",

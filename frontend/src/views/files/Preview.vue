@@ -48,6 +48,16 @@
         />
         <action
           :disabled="layoutStore.loading"
+          v-if="
+            ['image', 'audio', 'video'].includes(fileStore.req?.type || '') &&
+            authStore.user?.perm.download
+          "
+          icon="open_in_new"
+          :label="t('buttons.openDirect')"
+          @action="openDirect"
+        />
+        <action
+          :disabled="layoutStore.loading"
           icon="info"
           :label="$t('buttons.info')"
           show="info"
@@ -74,7 +84,6 @@
             }"
             :epubOptions="{
               allowPopups: true,
-              allowScriptedContent: true,
             }"
             @update:location="locationChange"
           />
@@ -253,7 +262,7 @@ const hoverNav = ref<boolean>(false);
 const autoPlay = ref<boolean>(false);
 const previousRaw = ref<string>("");
 const nextRaw = ref<string>("");
-const csvContent = ref<string>("");
+const csvContent = ref<ArrayBuffer | string>("");
 const csvError = ref<string>("");
 
 const player = ref<HTMLVideoElement | HTMLAudioElement | null>(null);
@@ -277,6 +286,10 @@ const downloadUrl = computed(() =>
   fileStore.req ? api.getDownloadURL(fileStore.req, false) : ""
 );
 
+const directUrl = computed(() =>
+  fileStore.req ? api.getDownloadURL(fileStore.req, true) : ""
+);
+
 const previewUrl = computed(() => {
   if (!fileStore.req) {
     return "";
@@ -297,7 +310,11 @@ const isPdf = computed(() => fileStore.req?.extension.toLowerCase() == ".pdf");
 const isEpub = computed(
   () => fileStore.req?.extension.toLowerCase() == ".epub"
 );
-const isCsv = computed(() => fileStore.req?.extension.toLowerCase() == ".csv");
+const isCsv = computed(
+  () =>
+    fileStore.req?.extension.toLowerCase() == ".csv" &&
+    fileStore.req.size <= CSV_MAX_SIZE
+);
 
 const isResizeEnabled = computed(() => resizePreview);
 
@@ -366,11 +383,19 @@ const key = (event: KeyboardEvent) => {
   if (layoutStore.currentPrompt !== null) {
     return;
   }
-  if (event.which === 13 || event.which === 39) {
+  // When previewing a video, let arrow keys fall through to video.js for
+  // seeking instead of switching to the prev/next file. Enter still advances.
+  const isVideo = fileStore.req?.type === "video";
+  if (event.which === 13) {
+    // enter
+    if (hasNext.value) next();
+  } else if (event.which === 39) {
     // right arrow
+    if (isVideo) return;
     if (hasNext.value) next();
   } else if (event.which === 37) {
     // left arrow
+    if (isVideo) return;
     if (hasPrevious.value) prev();
   } else if (event.which === 27) {
     // esc
@@ -393,7 +418,11 @@ const updatePreview = async () => {
     if (fileStore.req.size > CSV_MAX_SIZE) {
       csvError.value = t("files.csvTooLarge");
     } else {
-      csvContent.value = fileStore.req.content ?? "";
+      if (fileStore.req.rawContent != null) {
+        csvContent.value = fileStore.req.rawContent;
+      } else {
+        csvContent.value = fileStore.req.content ?? "";
+      }
     }
   }
 
@@ -466,6 +495,7 @@ const close = () => {
 };
 
 const download = () => window.open(downloadUrl.value);
+const openDirect = () => window.open(directUrl.value);
 
 const editAsText = () => {
   router.push({ path: route.path, query: { edit: "true" } });

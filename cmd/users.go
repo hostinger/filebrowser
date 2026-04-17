@@ -27,7 +27,7 @@ var usersCmd = &cobra.Command{
 
 func printUsers(usrs []*users.User) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tUsername\tScope\tLocale\tV. Mode\tS.Click\tAdmin\tExecute\tCreate\tRename\tModify\tDelete\tShare\tDownload\tPwd Lock")
+	fmt.Fprintln(w, "ID\tUsername\tScope\tLocale\tV. Mode\tS.Click\tRed. After C/M\tAdmin\tExecute\tCreate\tRename\tModify\tDelete\tShare\tDownload\tPwd Lock")
 
 	for _, u := range usrs {
 		fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%s\t%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t\t\n",
@@ -147,6 +147,8 @@ func getUserDefaults(flags *pflag.FlagSet, defaults *settings.UserDefaults, all 
 			defaults.Sorting.By, err = flags.GetString(flag.Name)
 		case "sorting.asc":
 			defaults.Sorting.Asc, err = flags.GetBool(flag.Name)
+		case "dateFormat":
+			defaults.DateFormat, err = flags.GetBool(flag.Name)
 		case "hideDotfiles":
 			defaults.HideDotfiles, err = flags.GetBool(flag.Name)
 		}
