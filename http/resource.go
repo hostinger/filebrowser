@@ -33,7 +33,7 @@ var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 		Expand:     true,
 		ReadHeader: d.server.TypeDetectionByHeader,
 		Checker:    d,
-		Content:    true,
+		Content:    d.user.Perm.Download,
 	})
 
 	// if the path does not exist and its the trash dir - create it
@@ -75,6 +75,7 @@ var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 		return renderJSON(w, r, file)
 	}
 
+	encoding := r.Header.Get("X-Encoding")
 	if file.IsDir {
 		file.Sorting = d.user.Sorting
 		file.ApplySort()
@@ -107,6 +108,29 @@ var resourceGetHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 			return true
 		})
 		return renderJSON(w, r, file)
+	} else if encoding == "true" {
+		if !d.user.Perm.Download {
+			return http.StatusAccepted, nil
+		}
+		if file.Type != "text" {
+			return renderJSON(w, r, file)
+		}
+
+		f, err := d.user.Fs.Open(r.URL.Path)
+		if err != nil {
+			return errToStatus(err), err
+		}
+		defer f.Close()
+
+		data, err := io.ReadAll(f)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
+
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.WriteHeader(http.StatusOK)
+		_, err = w.Write(data)
+		return 0, err
 	}
 
 	if checksum := r.URL.Query().Get("checksum"); checksum != "" {
@@ -284,59 +308,56 @@ var resourcePutHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 	return errToStatus(err), err
 })
 
-func checkSrcDstAccess(src, dst string, d *data) error {
-	if !d.Check(src) || !d.Check(dst) {
-		return fberrors.ErrPermissionDenied
-	}
-
-	if dst == "/" || src == "/" {
-		return fberrors.ErrPermissionDenied
-	}
-
-	if err := checkParent(src, dst); err != nil {
-		return fberrors.ErrInvalidRequestParams
-	}
-
-	return nil
-}
-
 func resourcePatchHandler(fileCache FileCache) handleFunc {
 	return withUser(func(_ http.ResponseWriter, r *http.Request, d *data) (int, error) {
 		src := r.URL.Path
 		dst := r.URL.Query().Get("destination")
 		action := r.URL.Query().Get("action")
-
+		// Hostinger specific start
+		unarchive := action == "unarchive"
+		overrideArch := false
 		if action == "chmod" {
 			err := chmodActionHandler(r, d)
 			return errToStatus(err), err
 		}
-
+		// Hostinger specific end
 		dst, err := url.QueryUnescape(dst)
-		if err != nil {
-			return errToStatus(err), err
-		}
-
-		err = checkSrcDstAccess(src, dst, d)
-		if err != nil {
-			return errToStatus(err), err
-		}
-
-		override := r.URL.Query().Get("override") == hostinger.QueryTrue
-		rename := r.URL.Query().Get("rename") == hostinger.QueryTrue
-		unarchive := action == "unarchive"
-		if !override && !rename && !unarchive {
-			if _, err = d.user.Fs.Stat(dst); err == nil {
-				return http.StatusConflict, nil
-			}
-		}
-
-		if rename {
-			dst = addVersionSuffix(dst, d.user.Fs)
-		}
-
-		// Permission for overwriting the file
-		if override && !d.user.Perm.Modify {
+		dst = path.Clean("/" + dst)
+		src = path.Clean("/" + src)
+		if !d.Check(src) || !d.Check(dst) {
 			return http.StatusForbidden, nil
+		}
+		if err != nil {
+			return errToStatus(err), err
+		}
+		if dst == "/" || src == "/" {
+			return http.StatusForbidden, nil
+		}
+
+		if err := checkParent(src, dst); err != nil {
+			return http.StatusBadRequest, err
+		}
+
+		srcInfo, _ := d.user.Fs.Stat(src)
+		dstInfo, _ := d.user.Fs.Stat(dst)
+		same := os.SameFile(srcInfo, dstInfo)
+
+		if action != "rename" || !same {
+			override := r.URL.Query().Get("override") == hostinger.QueryTrue
+			rename := r.URL.Query().Get("rename") == hostinger.QueryTrue
+			overrideArch = override
+			if !override && !rename && !unarchive {
+				if _, err = d.user.Fs.Stat(dst); err == nil {
+					return http.StatusConflict, nil
+				}
+			}
+			if rename {
+				dst = addVersionSuffix(dst, d.user.Fs)
+			}
+
+			if override && !d.user.Perm.Modify {
+				return http.StatusForbidden, nil
+			}
 		}
 
 		err = d.RunHook(func() error {
@@ -345,7 +366,7 @@ func resourcePatchHandler(fileCache FileCache) handleFunc {
 					return fberrors.ErrPermissionDenied
 				}
 
-				return hostinger.Unarchive(r.Context(), src, dst, d.user.Fs, override, d.settings.DirMode)
+				return hostinger.Unarchive(r.Context(), src, dst, d.user.Fs, overrideArch, d.settings.DirMode)
 			}
 			return patchAction(r.Context(), action, src, dst, d, fileCache)
 		}, action, src, dst, d.user)

@@ -33,6 +33,10 @@ var withHashFile = func(fn handleFunc) handleFunc {
 			return errToStatus(err), err
 		}
 
+		if !user.Perm.Share || !user.Perm.Download {
+			return http.StatusForbidden, nil
+		}
+
 		d.user = user
 
 		file, err := files.NewFileInfo(&files.FileOptions{
@@ -56,7 +60,7 @@ var withHashFile = func(fn handleFunc) handleFunc {
 		filePath := ""
 
 		if file.IsDir {
-			basePath = filepath.Dir(basePath)
+			basePath = filepath.Clean(link.Path)
 			filePath = ifPath
 		}
 

@@ -167,6 +167,16 @@ var signupHandler = func(_ http.ResponseWriter, r *http.Request, d *data) (int, 
 
 	d.settings.Defaults.Apply(user)
 
+	// Users signed up via the signup handler should never become admins, even
+	// if that is the default permission.
+	user.Perm.Admin = false
+
+	// Self-registered users should not inherit execution capabilities from
+	// default settings, regardless of what the administrator has configured
+	// as the default. Execution rights must be explicitly granted by an admin.
+	user.Perm.Execute = false
+	user.Commands = []string{}
+
 	pwd, err := users.ValidateAndHashPwd(info.Password, d.settings.MinimumPasswordLength)
 	if err != nil {
 		return http.StatusBadRequest, err

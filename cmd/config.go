@@ -237,6 +237,7 @@ func printSettings(ser *settings.Server, set *settings.Settings, auther auth.Aut
 
 	fmt.Fprintln(w, "\nDefaults:")
 	fmt.Fprintf(w, "\tScope:\t%s\n", set.Defaults.Scope)
+	fmt.Fprintf(w, "\tDateFormat:\t%t\n", set.Defaults.DateFormat)
 	fmt.Fprintf(w, "\tHideDotfiles:\t%t\n", set.Defaults.HideDotfiles)
 	fmt.Fprintf(w, "\tLocale:\t%s\n", set.Defaults.Locale)
 	fmt.Fprintf(w, "\tView mode:\t%s\n", set.Defaults.ViewMode)

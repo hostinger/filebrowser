@@ -1,7 +1,7 @@
 interface ResourceBase {
   path: string;
   name: string;
-  link: string;
+  link: string; // symlink target path
   size: number;
   extension: string;
   modified: string; // ISO 8601 datetime
@@ -22,6 +22,7 @@ interface Resource extends ResourceBase {
   index: number;
   subtitles?: string[];
   content?: string;
+  rawContent?: ArrayBuffer;
 }
 
 interface ResourceItem extends ResourceBase {
@@ -52,6 +53,8 @@ type DownloadFormat =
 interface ClipItem {
   from: string;
   name: string;
+  size?: number;
+  modified?: string;
 }
 
 interface BreadCrumb {
@@ -59,7 +62,20 @@ interface BreadCrumb {
   url: string;
 }
 
-interface DiskUsage {
-  size: number;
-  inodes: number;
+interface ConflictingItem {
+  lastModified: number | string | undefined;
+  size: number | undefined;
+}
+
+interface ConflictingResource {
+  index: number;
+  name: string;
+  origin: ConflictingItem;
+  dest: ConflictingItem;
+  checked: Array<"origin" | "dest">;
+}
+  
+interface CsvData {
+  headers: string[];
+  rows: string[][];
 }
