@@ -23,7 +23,7 @@
     "@vueuse/integrations": "^14.2.1",
     "ace-builds": "^1.43.6",
     "dayjs": "^1.11.20",
-    "dompurify": "^3.3.3",
+    "dompurify": "^3.4.0",
     "csv-parse": "^6.1.0",
     "epubjs": "^0.3.93",
     "filesize": "^11.0.15",
