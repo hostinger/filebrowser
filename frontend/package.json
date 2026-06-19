@@ -24,7 +24,7 @@
     "ace-builds": "^1.43.6",
     "csv-parse": "^6.2.1",
     "dayjs": "^1.11.20",
-    "dompurify": "^3.4.1",
+    "dompurify": "^3.4.11",
     "epubjs": "^0.3.93",
     "filesize": "^11.0.17",
     "js-base64": "^3.7.8",
