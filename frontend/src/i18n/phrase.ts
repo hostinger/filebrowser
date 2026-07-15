@@ -114,7 +114,8 @@ function triggerIceRescanOnDomChange() {
   new MutationObserver((mutations) => {
     for (const m of mutations) {
       if (
-        (m.type === "childList" && m.addedNodes.length > 0) ||
+        (m.type === "childList" &&
+          (m.addedNodes.length > 0 || m.removedNodes.length > 0)) ||
         m.type === "characterData"
       ) {
         trigger();

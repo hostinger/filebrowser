@@ -98,6 +98,21 @@ describe("loadPhraseIce", () => {
     );
   });
 
+  it("clears the opt-in via ?phraseapp=disabled", async () => {
+    const phrase = await importPhrase("staging");
+    documentStub.cookie = "phraseapp=enabled";
+    locationStub.href = "https://staging.example.com/files/?phraseapp=disabled";
+
+    phrase.loadPhraseIce();
+
+    expect(documentStub.cookie).not.toContain("phraseapp=enabled");
+    expect(locationStub.replace).toHaveBeenCalledWith(
+      "https://staging.example.com/files/"
+    );
+    expect(window.PHRASEAPP_CONFIG).toBeUndefined();
+    expect(appendedScripts).toHaveLength(0);
+  });
+
   it("sets PHRASEAPP_CONFIG and injects the ICE script when opted in", async () => {
     const phrase = await importPhrase("staging");
     documentStub.cookie = "phraseapp=enabled";
@@ -139,9 +154,15 @@ describe("phrasePostTranslation", () => {
     );
   });
 
-  it("passes non-string messages through untouched", async () => {
+  it("passes non-string messages through untouched even when ready", async () => {
+    vi.useFakeTimers();
     const phrase = await importPhrase("staging");
+    documentStub.cookie = "phraseapp=enabled";
     const message = [{ type: "text" }];
+
+    phrase.loadPhraseIce();
+    appendedScripts[0].onload?.();
+    vi.advanceTimersByTime(1000);
 
     expect(phrase.phrasePostTranslation(message as never, "key")).toBe(message);
   });
