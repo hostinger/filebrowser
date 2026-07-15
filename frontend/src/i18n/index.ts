@@ -18,6 +18,12 @@ import("dayjs/locale/zh-cn");
 // at once using the import syntax
 import messages from "@intlify/unplugin-vue-i18n/messages";
 
+import {
+  loadPhraseIce,
+  phraseIceEnabled,
+  phrasePostTranslation,
+} from "./phrase";
+
 export function detectLocale() {
   // locale is an RFC 5646 language tag
   // https://developer.mozilla.org/en-US/docs/Web/API/Navigator/language
@@ -90,12 +96,15 @@ export function detectLocale() {
 
 export const rtlLanguages = ["ar_AR"];
 
+loadPhraseIce();
+
 export const i18n = createI18n({
   locale: detectLocale(),
   fallbackLocale: "en_GB",
   messages,
   // expose i18n.global for outside components
   legacy: true,
+  ...(phraseIceEnabled ? { postTranslation: phrasePostTranslation } : {}),
 });
 
 export const isRtl = (locale?: string) => {
