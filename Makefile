@@ -28,6 +28,13 @@ build: | build-frontend build-backend ## Build binary
 build-frontend: ## Build frontend
 	cd frontend && pnpm install --frozen-lockfile && pnpm run build
 
+.PHONY: build-staging
+build-staging: | build-frontend-staging build-backend ## Build binary with Phrase ICE embedded (staging only, never production)
+
+.PHONY: build-frontend-staging
+build-frontend-staging: ## Build frontend with Phrase In-Context Editor (staging only)
+	cd frontend && pnpm install --frozen-lockfile && pnpm run build:staging
+
 .PHONY: build-backend
 build-backend: ## Build backend
 	$(go) build -ldflags '$(LDFLAGS)' -o .

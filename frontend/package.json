@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "pnpm run typecheck && vite build",
+    "build:staging": "pnpm run typecheck && vite build --mode staging",
     "clean": "find ./dist -maxdepth 1 -mindepth 1 ! -name '.gitkeep' -exec rm -r {} +",
     "typecheck": "vue-tsc -p ./tsconfig.app.json --noEmit",
     "lint": "eslint src/",
