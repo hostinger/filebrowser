@@ -67,7 +67,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-vue": "^10.9.0",
-    "postcss": "^8.5.12",
+    "postcss": "^8.5.18",
     "prettier": "^3.8.3",
     "terser": "^5.46.2",
     "typescript": "^5.9.3",
