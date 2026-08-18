@@ -25,7 +25,7 @@
     "ace-builds": "^1.43.6",
     "csv-parse": "^6.2.1",
     "dayjs": "^1.11.20",
-    "dompurify": "^3.4.12",
+    "dompurify": "^3.4.13",
     "epubjs": "^0.3.93",
     "filesize": "^11.0.17",
     "js-base64": "^3.7.8",
@@ -67,7 +67,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-vue": "^10.9.0",
-    "postcss": "^8.5.12",
+    "postcss": "^8.5.23",
     "prettier": "^3.8.3",
     "terser": "^5.46.2",
     "typescript": "^5.9.3",
@@ -78,7 +78,10 @@
   },
   "pnpm": {
     "overrides": {
-      "@xmldom/xmldom@<0.8.13": "^0.8.13"
+      "@xmldom/xmldom@<0.8.13": "^0.8.13",
+      "brace-expansion@>=4.0.0 <5.0.9": ">=5.0.9",
+      "nanoid@<3.3.18": ">=3.3.18",
+      "esbuild@>=0.27.3 <0.28.1": ">=0.28.1"
     }
   },
   "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
