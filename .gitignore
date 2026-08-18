@@ -10,6 +10,7 @@ rice-box.go
 
 .DS_Store
 node_modules
+.pnpm-store/
 
 # local env files
 .env.local

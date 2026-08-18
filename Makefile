@@ -1,9 +1,10 @@
 VERSION ?= $(shell git describe --tags --always --match=v* 2> /dev/null || cat $(CURDIR)/.version 2> /dev/null || echo v0)
 VERSION_HASH = $(shell git rev-parse HEAD)
+VERSION_TAG ?= $(VERSION)
 
 MODULE = $(shell env GO111MODULE=on go list -m)
 
-LDFLAGS += -X "$(MODULE)/version.Version=$(VERSION)" -X "$(MODULE)/version.CommitSHA=$(VERSION_HASH)"
+LDFLAGS += -X "$(MODULE)/version.Version=$(VERSION_TAG)" -X "$(MODULE)/version.CommitSHA=$(VERSION_HASH)"
 
 go = GOGC=off go
 
@@ -70,7 +71,22 @@ fmt: $(goimports) ## Format source files
 
 ## Release:
 
-.PHONY: build-release-bin
-build-release-bin: build-frontend
-	GO111MODULE=on GOOS=linux GOARCH=amd64 $(go) build -trimpath -ldflags '$(LDFLAGS)' -o bin/filebrowser-$(VERSION)
-	tar -C bin -czf "dist/filebrowser-$(VERSION).tar.gz" "filebrowser-$(VERSION)"
+define build_release_bin
+mkdir -p bin dist
+GO111MODULE=on GOOS=linux GOARCH=amd64 $(go) build -trimpath -ldflags '$(LDFLAGS)' -o bin/filebrowser-$(VERSION_TAG)
+tar -C bin -czf "dist/filebrowser-$(VERSION_TAG).tar.gz" "filebrowser-$(VERSION_TAG)"
+endef
+
+.PHONY: build-release-bins
+build-release-bins: ## Build staging and production release binaries
+	$(MAKE) build-release-bin-staging
+	$(MAKE) build-release-bin-prod
+
+.PHONY: build-release-bin-staging
+build-release-bin-staging: VERSION_TAG = $(VERSION)-staging
+build-release-bin-staging: build-frontend-staging
+	$(build_release_bin)
+
+.PHONY: build-release-bin-prod
+build-release-bin-prod: build-frontend
+	$(build_release_bin)
